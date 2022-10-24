@@ -1,0 +1,68 @@
+from warnings import warn
+
+import yaml
+from data_collectors._data_collector import DataCollector
+from data_collectors import Conv2dDataCollector
+from data_collectors.activations import ActivationsDataCollector
+from data_collectors.linear import LinearDataCollector
+from data_collectors.maxpooling2d import MaxPooling2dDataCollector
+
+data_collectors = {
+    "conv2d": Conv2dDataCollector,
+    "linear": LinearDataCollector,
+    "maxpooling2d": MaxPooling2dDataCollector,
+    "activations": ActivationsDataCollector
+}
+
+
+def load_configuration(path) -> dict:
+    """
+    loads the configuration for the data-collection process from the .yaml file
+    :param path: the path to the configuration file
+    :return: a dict containing the configuration
+    """
+    # load data-collection configuration from yaml-file
+    with open(path, "r") as stream:
+        try:
+            config = yaml.safe_load(stream)
+        except yaml.YAMLError as exc:
+            print(exc)
+    return config
+
+
+def load_data_collectors(module_configs) -> {str: DataCollector}:
+    """
+    this method instantiates the DataCollectors specified in the configuration file
+    :param module_configs: the configuration dict
+    :return: a dict containing the DataCollector instances
+    """
+    collectors_dict = {}
+    for module_name, config in module_configs["module_configurations"].items():
+        print(f"Loading [{module_name}] data-collector")
+        collector = data_collectors[module_name](
+            sampling_timeout=module_configs['sampling_timeout'],
+            module_param_configs={param: range(*value) for param, value in config['module_params'].items()},
+            configs_from_architectures=config['meta']['configs_from_architectures'],
+            output_path=config['meta']['output_path'],
+            sampling_cutoff=config['meta']['sampling_cutoff'],
+            num_repeat_config=config['meta']['num_repeat_config'],
+            random_sampling=config['meta']['random_sampling'],
+        )
+        collectors_dict[module_name] = collector
+    return collectors_dict
+
+
+def run_data_collection(collectors_to_run) -> None:
+    """
+    executes one DataCollector after the other
+    :param collectors_to_run: the DataCollector instances
+    """
+    for c_name, c in collectors_to_run.items():
+        print(f"Starting data-collection for {c_name}...")
+        c.run()
+
+
+if __name__ == '__main__':
+    configuration = load_configuration(path='./configuration.yaml')
+    collectors = load_data_collectors(configuration)
+    run_data_collection(collectors)
