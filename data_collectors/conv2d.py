@@ -30,8 +30,9 @@ class Conv2dDataCollector(DataCollector):
 
     def get_conv2d_configs_from_architectures(self) -> [dict]:
         """
-        traverses an architecture like VGG11 and extracts the configuration of its Conv2D modules
-        :return: a list of Conv2D configuration extracted from architectures
+        traverses the architectures such as VGG11 specified in the configuration and extracts the configuration of
+        all its Conv2d modules
+        :return: a list of Conv2d configuration extracted from architectures
         """
         conv2d_configs = []
         for a in self.configs_from_architectures:
@@ -59,13 +60,13 @@ class Conv2dDataCollector(DataCollector):
         :param data_dim: the dimensions of the data
         :return: True with configuration is valid, otherwise False
         """
-        if isinstance(module, torch.nn.Conv2d):
-            if module.kernel_size[0] > data_dim[3]:
-                return False
-            elif module.stride[0] > data_dim[3]:
-                return False
-            else:
-                return True
+
+        if module.kernel_size[0] > data_dim[3]:
+            return False
+        elif module.stride[0] > data_dim[3]:
+            return False
+        else:
+            return True
 
     def initialize_module(self, config) -> torch.nn.Conv2d:
         """
