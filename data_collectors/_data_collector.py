@@ -2,6 +2,7 @@ import abc
 import math
 import time
 import torch
+import random
 from collections.abc import Iterable
 from functools import reduce
 from itertools import product
@@ -11,6 +12,7 @@ from warnings import warn
 from codecarbon import EmissionsTracker
 from ptflops import get_model_complexity_info
 from tqdm import tqdm
+random.seed = 111111
 
 
 class DataCollector(abc.ABC):
@@ -143,11 +145,10 @@ class DataCollector(abc.ABC):
                 module = self.initialize_module(config)
                 data = self.generate_data(config)
             module.eval()
-            try:
-                for rep_no in range(1, self.num_repeat_config + 1):
-                    self.run_forward_passes(config, module, data, rep_no, self.output_path)
-            except:
-                warn(f"An error occurred while processing this config [{config}]\n")
+            for rep_no in range(1, self.num_repeat_config + 1):
+                 self.run_forward_passes(config, module, data, rep_no, self.output_path)
+            #except:
+            #    warn(f"An error occurred while processing this config [{config}]\n")
 
         print("----- Finished -----")
 

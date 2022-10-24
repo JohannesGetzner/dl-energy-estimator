@@ -5,6 +5,7 @@ from torch.nn.modules import Conv2d
 from torchvision import models
 from data_collectors._data_collector import DataCollector
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
+random.seed = 111111
 
 
 class Conv2dDataCollector(DataCollector):
