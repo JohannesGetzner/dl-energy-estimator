@@ -4,6 +4,7 @@ from torch.nn import MaxPool2d
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
 from torchvision import models
 from data_collectors._data_collector import DataCollector
+random.seed = 111111
 
 
 class MaxPooling2dDataCollector(DataCollector):
@@ -62,6 +63,8 @@ class MaxPooling2dDataCollector(DataCollector):
         if module.kernel_size > data_dim[3]:
             return False
         elif module.stride > data_dim[3]:
+            return False
+        elif module.padding > module.kernel_size/2:
             return False
         else:
             return True
