@@ -35,25 +35,25 @@ module_configurations:
 #      in_channels: [ 1,513,1 ]
 #      stride: [ 1,6,1 ]
 #      padding: [ 0,4,1 ]
-  linear:
-    meta:
-      random_sampling: True
-      sampling_cutoff: 1
-      num_repeat_config: 1
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-      output_path: "./linear-energies.csv"
-    module_params:
-      batch_size: [ 1,513,1 ]
-      input_size: [ 1,5001,1 ]
-      output_size: [ 1,5001,1 ]
-#  activations:
+#  linear:
 #    meta:
 #      random_sampling: True
-#      # no. of samples for all activations in total i.e. 100 -> 25 per activation
-#      sampling_cutoff: 20
+#      sampling_cutoff: 1
 #      num_repeat_config: 1
-#      configs_from_architectures: []
-#      output_path: "./activations-energies.csv"
+#      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+#      output_path: "./linear-energies.csv"
 #    module_params:
 #      batch_size: [ 1,513,1 ]
 #      input_size: [ 1,5001,1 ]
+#      output_size: [ 1,5001,1 ]
+  activations:
+    meta:
+      random_sampling: True
+      # no. of samples for all activations in total i.e. 100 -> 25 per activation
+      sampling_cutoff: 20
+      num_repeat_config: 1
+      configs_from_architectures: []
+      output_path: "./activations-energies.csv"
+    module_params:
+      batch_size: [ 1,513,1 ]
+      input_size: [ 1,5001,1 ]
