@@ -95,7 +95,7 @@ class Conv2dDataCollector(DataCollector):
         starts the data collection
         """
         print("Doing random configs...")
-        # self.run_data_collection()
+        self.run_data_collection()
         if self.configs_from_architectures:
             print("Doing architecture configs...")
             self.run_data_collection(custom_configs=self.get_conv2d_configs_from_architectures())
