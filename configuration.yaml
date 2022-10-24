@@ -3,38 +3,38 @@
 sampling_timeout: 1
 modules: [ "conv2d", "maxpooling2d", "linear", "activations" ]
 module_configurations:
-  conv2d:
-    meta:
-      # Attention: if False all possible combinations from module_params will be computed
-      random_sampling: True
-      # number of samples if random_sampling True
-      sampling_cutoff: 5
-      num_repeat_config: 3
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-      output_path: "./conv2d-energies.csv"
-    module_params:
-      # parameter: range[from,to,by]
-      batch_size: [ 1,257,1 ]
-      image_size: [ 4,225,1 ]
-      kernel_size: [ 1,12,1 ]
-      in_channels: [ 1,513,1 ]
-      out_channels: [ 1,513,1 ]
-      stride: [ 1,6,1 ]
-      padding: [ 0,4,1 ]
-#  maxpooling2d:
+#  conv2d:
 #    meta:
+#      # Attention: if False all possible combinations from module_params will be computed
 #      random_sampling: True
-#      sampling_cutoff: 500
-#      num_repeat_config: 1
+#      # number of samples if random_sampling True
+#      sampling_cutoff: 5
+#      num_repeat_config: 3
 #      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-#      output_path: "./maxpooling2d-energies.csv"
+#      output_path: "./conv2d-energies.csv"
 #    module_params:
+#      # parameter: range[from,to,by]
 #      batch_size: [ 1,257,1 ]
 #      image_size: [ 4,225,1 ]
 #      kernel_size: [ 1,12,1 ]
 #      in_channels: [ 1,513,1 ]
+#      out_channels: [ 1,513,1 ]
 #      stride: [ 1,6,1 ]
 #      padding: [ 0,4,1 ]
+  maxpooling2d:
+    meta:
+      random_sampling: True
+      sampling_cutoff: 1
+      num_repeat_config: 1
+      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      output_path: "./maxpooling2d-energies.csv"
+    module_params:
+      batch_size: [ 1,257,1 ]
+      image_size: [ 4,225,1 ]
+      kernel_size: [ 1,12,1 ]
+      in_channels: [ 1,513,1 ]
+      stride: [ 1,6,1 ]
+      padding: [ 0,4,1 ]
 #  linear:
 #    meta:
 #      random_sampling: True

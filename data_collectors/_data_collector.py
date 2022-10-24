@@ -178,6 +178,4 @@ class DataCollector(abc.ABC):
                 count += 1
         # record number of forward-passes in codecarbon output
         tracker._project_name = f"{tracker._project_name},forward_passes:{count}"
-        if config["note"] != '':
-            tracker._project_name = f"{tracker._project_name},note:{config['note']}"
         tracker.stop()
