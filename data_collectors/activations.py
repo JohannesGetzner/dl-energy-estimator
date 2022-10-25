@@ -25,6 +25,7 @@ class ActivationsDataCollector(DataCollector):
         self.count = 0
 
     def validate_config(self, module, data_dim) -> bool:
+        # there are no wrong configurations for activation functions
         return True
 
     def initialize_module(self, config) -> torch.nn.Module:
@@ -55,6 +56,5 @@ class ActivationsDataCollector(DataCollector):
     def run(self) -> None:
         """
         starts the data collection
-        :return:
         """
         self.run_data_collection()

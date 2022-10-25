@@ -73,7 +73,6 @@ class LinearDataCollector(DataCollector):
     def run(self) -> None:
         """
         starts the data collection
-        :return:
         """
         print("Doing random configs...")
         self.run_data_collection()
