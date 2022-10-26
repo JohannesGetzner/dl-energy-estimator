@@ -1,23 +1,21 @@
-import random
-
+import numpy as np
 import torch
 from torch.nn.modules import Conv2d
 from torchvision import models
 from data_collectors._data_collector import DataCollector
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
-random.seed = 111111
-
 
 class Conv2dDataCollector(DataCollector):
 
     def __init__(self,
                  module_param_configs,
-                 output_path="./out.csv",
+                 output_path="./conv2d-out.csv",
                  sampling_cutoff=500,
                  num_repeat_config=1,
                  random_sampling=True,
                  configs_from_architectures=None,
                  sampling_timeout=30,
+                 seed=None
                  ):
         super(Conv2dDataCollector, self).__init__(
             module_param_configs,
@@ -25,46 +23,49 @@ class Conv2dDataCollector(DataCollector):
             sampling_cutoff,
             num_repeat_config,
             random_sampling,
-            output_path
+            output_path,
+            seed
         )
+        if seed:
+            np.random.seed(seed)
         self.configs_from_architectures = configs_from_architectures
 
-    def get_conv2d_configs_from_architectures(self) -> [dict]:
+    def get_conv2d_configs_from_architectures(self):
         """
         traverses the architectures such as VGG11 specified in the configuration and extracts the configuration of
         all its Conv2d modules
         :return: a list of Conv2d configuration extracted from architectures
         """
         conv2d_configs = []
+        conv2d_modules = []
         for a in self.configs_from_architectures:
             architecture = getattr(models, a)(weights=None)
-            modules = traverse_architecture_and_return_module_configs(architecture, Conv2d)
+            modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[torch.nn.Conv2d]
             for module, input_shape, layer_idx in modules:
-                new_config = {
+                new_config = ({
+                    "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
                     "image_size": input_shape[2],
                     "kernel_size": module.kernel_size[0],
                     "in_channels": module.in_channels,
                     "out_channels": module.out_channels,
                     "stride": module.stride[0],
                     "padding": module.padding[0],
-                    "batch_size": random.choice(self.module_param_configs["batch_size"]),
                     "note": f"{a}(layer_idx:{layer_idx})"
-                }
+                })
                 conv2d_configs.append(new_config)
-        return conv2d_configs
+                conv2d_modules.append(module)
+        return conv2d_configs, conv2d_modules
 
-    def validate_config(self, module, data_dim) -> bool:
+    def validate_config(self, config) -> bool:
         """
         validates the current configuration. For some modules e.g. Conv2D the kernel-size cannot be larger
         than the image-size
-        :param module: the PyTorch Conv2D module
-        :param data_dim: the dimensions of the data
+        :config: the config to validate
         :return: True with configuration is valid, otherwise False
         """
-
-        if module.kernel_size[0] > data_dim[3]:
+        if config["kernel_size"] > config["image_size"]:
             return False
-        elif module.stride[0] > data_dim[3]:
+        elif config["stride"] > config["image_size"]:
             return False
         else:
             return True
@@ -95,8 +96,16 @@ class Conv2dDataCollector(DataCollector):
         """
         starts the data collection
         """
+        random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
+        a_configs, a_modules = [], []
+        if self.configs_from_architectures:
+            a_configs, a_modules = self.get_conv2d_configs_from_architectures()
+        self.print_data_collection_info(random_configs + a_configs)
+
         print("Doing random configs...")
-        self.run_data_collection()
+        modules = [self.initialize_module(config) for config in random_configs]
+        self.run_data_collection_multiple_configs(random_configs, modules)
+
         if self.configs_from_architectures:
             print("Doing architecture configs...")
-            self.run_data_collection(custom_configs=self.get_conv2d_configs_from_architectures())
+            self.run_data_collection_multiple_configs(a_configs, a_modules)

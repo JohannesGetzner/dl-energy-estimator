@@ -37,17 +37,38 @@ def load_data_collectors(module_configs) -> {str: DataCollector}:
     :return: a dict containing the DataCollector instances
     """
     collectors_dict = {}
+    seed = module_configs['seed']
+    sampling_timeout = module_configs['sampling_timeout']
     for module_name, config in module_configs["module_configurations"].items():
         print(f"Loading [{module_name}] data-collector")
-        collector = data_collectors[module_name](
-            sampling_timeout=module_configs['sampling_timeout'],
-            module_param_configs={param: range(*value) for param, value in config['module_params'].items()},
-            configs_from_architectures=config['meta']['configs_from_architectures'],
-            output_path=config['meta']['output_path'],
-            sampling_cutoff=config['meta']['sampling_cutoff'],
-            num_repeat_config=config['meta']['num_repeat_config'],
-            random_sampling=config['meta']['random_sampling'],
-        )
+        if not config['meta']['random_sampling']:
+            print("Attention: grid-search enabled. Computing all possible (valid) parameter combinations.")
+        if module_name == 'activations':
+            collector = ActivationsDataCollector(
+                sampling_timeout=sampling_timeout,
+                seed=seed,
+                module_param_configs={param: range(*value) if config['meta']['random_sampling'] else value for
+                                      param, value in
+                                      config['module_params'].items()},
+                activation_types=config['meta']['activation_types'],
+                output_path=config['meta']['output_path'],
+                sampling_cutoff=config['meta']['sampling_cutoff'],
+                num_repeat_config=config['meta']['num_repeat_config'],
+                random_sampling=config['meta']['random_sampling']
+            )
+        else:
+            collector = data_collectors[module_name](
+                sampling_timeout=sampling_timeout,
+                seed=seed,
+                module_param_configs={param: range(*value) if config['meta']['random_sampling'] else value for
+                                      param, value in
+                                      config['module_params'].items()},
+                configs_from_architectures=config['meta']['configs_from_architectures'],
+                output_path=config['meta']['output_path'],
+                sampling_cutoff=config['meta']['sampling_cutoff'],
+                num_repeat_config=config['meta']['num_repeat_config'],
+                random_sampling=config['meta']['random_sampling'],
+            )
         collectors_dict[module_name] = collector
     return collectors_dict
 
@@ -58,7 +79,7 @@ def run_data_collection(collectors_to_run) -> None:
     :param collectors_to_run: the DataCollector instances
     """
     for c_name, c in collectors_to_run.items():
-        print(f"Starting data-collection for {c_name}...")
+        print(f"\nStarting data-collection for {c_name}...")
         c.run()
 
 

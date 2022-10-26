@@ -32,14 +32,15 @@ def get_modules_from_architecture(a) -> [nn.Module]:
     return layers
 
 
-def traverse_architecture_and_return_module_configs(a, module_type):
+def traverse_architecture_and_return_module_configs(a, by_type=False):
     """
-    extracts all module types from an architecture and the input size of the data for that module
+    extracts all modules from an architecture and the input size of the data for that module
+    :param by_type:
     :param a: the architecture
-    :param module_type: the module type to be extracted
-    :return: returns all modules with the data shape from the specified module type
+    :return: a list containing the modules in the right order or a dict containing the modules by type
     """
     modules_by_type = {}
+    modules_by_order = []
     # initialize dict
     modules = get_modules_from_architecture(a)
     for module in modules:
@@ -51,5 +52,9 @@ def traverse_architecture_and_return_module_configs(a, module_type):
             sample_input = torch.flatten(sample_input)
         # tuple is (module, input_shape, module_layer_index)
         modules_by_type[type(module)].append((module, sample_input.shape, idx))
+        modules_by_order.append((module, sample_input.shape, idx))
         sample_input = module(sample_input)
-    return modules_by_type[module_type]
+    if by_type:
+        return modules_by_type
+    else:
+        return modules_by_order

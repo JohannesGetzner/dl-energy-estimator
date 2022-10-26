@@ -11,8 +11,9 @@ class ActivationsDataCollector(DataCollector):
                  sampling_cutoff=500,
                  num_repeat_config=1,
                  random_sampling=True,
-                 configs_from_architectures=None,
                  sampling_timeout=30,
+                 activation_types=None,
+                 seed=None
                  ):
         super(ActivationsDataCollector, self).__init__(
             module_param_configs,
@@ -20,30 +21,31 @@ class ActivationsDataCollector(DataCollector):
             sampling_cutoff,
             num_repeat_config,
             random_sampling,
-            output_path
+            output_path,
+            seed
         )
-        self.count = 0
+        self.activation_types = activation_types
 
-    def validate_config(self, module, data_dim) -> bool:
+    def validate_config(self, config) -> bool:
         # there are no wrong configurations for activation functions
         return True
 
     def initialize_module(self, config) -> torch.nn.Module:
         """
         initializes the PyTorch Linear module
-        :param config: a dict that contains the values for the module parameters
-        :return: the Linear module
+        :param config: the current activation type
+        :return: the corresponding activation PyTorch module
         """
-        if self.count < self.sampling_cutoff / 4:
-            module = ReLU()
-        elif self.sampling_cutoff / 4 <= self.count < self.sampling_cutoff / 2:
-            module = Sigmoid()
-        elif self.sampling_cutoff / 2 <= self.count < self.sampling_cutoff / 4 * 3:
-            module = Softmax(dim=1)
+        if config == 'relu':
+            return ReLU()
+        elif config == 'sigmoid':
+            return Sigmoid()
+        elif config == 'softmax':
+            return Softmax(dim=1)
+        elif config == 'tanh':
+            return Tanh()
         else:
-            module = Tanh()
-        self.count += 1
-        return module
+            raise NotImplementedError(f"Activation of type {config} not implemented")
 
     def generate_data(self, config) -> torch.Tensor:
         """
@@ -57,4 +59,13 @@ class ActivationsDataCollector(DataCollector):
         """
         starts the data collection
         """
-        self.run_data_collection()
+        if not self.activation_types:
+            raise NotImplementedError('at least one activation type has to be specified')
+
+        random_configs = []
+        modules = []
+        for a in self.activation_types:
+            random_configs += self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
+            modules += [self.initialize_module(a) for i in range(self.sampling_cutoff)]
+        print("Doing random configs...")
+        self.run_data_collection_multiple_configs(random_configs, modules)

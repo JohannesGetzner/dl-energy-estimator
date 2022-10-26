@@ -1,10 +1,9 @@
-import random
+import numpy as np
 import torch
 from torch.nn import MaxPool2d
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
 from torchvision import models
 from data_collectors._data_collector import DataCollector
-random.seed = 111111
 
 
 class MaxPooling2dDataCollector(DataCollector):
@@ -17,6 +16,7 @@ class MaxPooling2dDataCollector(DataCollector):
                  random_sampling=True,
                  configs_from_architectures=None,
                  sampling_timeout=30,
+                 seed=None
                  ):
         super(MaxPooling2dDataCollector, self).__init__(
             module_param_configs,
@@ -24,8 +24,11 @@ class MaxPooling2dDataCollector(DataCollector):
             sampling_cutoff,
             num_repeat_config,
             random_sampling,
-            output_path
+            output_path,
+            seed
         )
+        if seed:
+            np.random.seed(seed)
         self.configs_from_architectures = configs_from_architectures
 
     def get_maxpooling2d_configs_from_architectures(self):
@@ -35,9 +38,10 @@ class MaxPooling2dDataCollector(DataCollector):
         :return: a list of MaxPool2d configurations
         """
         maxpool2d_configs = []
+        maxpool2d_modules = []
         for a in self.configs_from_architectures:
             architecture = getattr(models, a)(weights=None)
-            modules = traverse_architecture_and_return_module_configs(architecture, MaxPool2d)
+            modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[MaxPool2d]
             for module, input_shape, layer_idx in modules:
                 new_config = {
                     "image_size": input_shape[2],
@@ -45,14 +49,14 @@ class MaxPooling2dDataCollector(DataCollector):
                     "kernel_size": module.kernel_size,
                     "stride": module.stride,
                     "padding": module.padding,
-                    "batch_size": random.choice(self.module_param_configs["batch_size"]),
+                    "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
                     "note": f"{a}(layer_idx:{layer_idx})"
                 }
                 maxpool2d_configs.append(new_config)
-        return maxpool2d_configs
-        pass
+                maxpool2d_modules.append(module)
+        return maxpool2d_configs, maxpool2d_modules
 
-    def validate_config(self, module, data_dim) -> bool:
+    def validate_config(self, config) -> bool:
         """
         validates the current configuration. For some modules e.g. MaxPooling2D the kernel-size cannot be larger
         than the image-size
@@ -60,11 +64,11 @@ class MaxPooling2dDataCollector(DataCollector):
         :param data_dim: the dimensions of the data
         :return: True with configuration is valid, otherwise False
         """
-        if module.kernel_size > data_dim[3]:
+        if config["kernel_size"] > config["image_size"]:
             return False
-        elif module.stride > data_dim[3]:
+        elif config["stride"] > config["image_size"]:
             return False
-        elif module.padding > module.kernel_size/2:
+        elif config["padding"] > config["kernel_size"]/2:
             return False
         else:
             return True
@@ -93,8 +97,16 @@ class MaxPooling2dDataCollector(DataCollector):
         """
         starts the data collection
         """
+        random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
+        a_configs, a_modules = [], []
+        if self.configs_from_architectures:
+            a_configs, a_modules = self.get_maxpooling2d_configs_from_architectures()
+        self.print_data_collection_info(random_configs + a_configs)
+
         print("Doing random configs...")
-        self.run_data_collection()
+        modules = [self.initialize_module(config) for config in random_configs]
+        self.run_data_collection_multiple_configs(random_configs, modules)
+
         if self.configs_from_architectures:
             print("Doing architecture configs...")
-            self.run_data_collection(custom_configs=self.get_maxpooling2d_configs_from_architectures())
+            self.run_data_collection_multiple_configs(a_configs, a_modules)

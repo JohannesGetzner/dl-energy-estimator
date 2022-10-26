@@ -1,10 +1,10 @@
 import torch
-import random
+import numpy as np
 from torch.nn.modules import Linear
 from torchvision import models
 from data_collectors._data_collector import DataCollector
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
-random.seed = 111111
+from tqdm import tqdm
 
 
 class LinearDataCollector(DataCollector):
@@ -17,6 +17,7 @@ class LinearDataCollector(DataCollector):
                  random_sampling=True,
                  configs_from_architectures=None,
                  sampling_timeout=30,
+                 seed=None
                  ):
         super(LinearDataCollector, self).__init__(
             module_param_configs,
@@ -24,32 +25,37 @@ class LinearDataCollector(DataCollector):
             sampling_cutoff,
             num_repeat_config,
             random_sampling,
-            output_path
+            output_path,
+            seed
         )
+        if seed:
+            np.random.seed(seed)
         self.configs_from_architectures = configs_from_architectures
 
-    def validate_config(self, module, data_dim) -> bool:
+    def validate_config(self,  config) -> bool:
         return True
 
-    def get_linear_configs_from_architectures(self) -> [dict]:
+    def get_linear_configs_from_architectures(self) -> [({}, torch.nn.Module)]:
         """
         traverses the architectures such as VGG11 specified in the configuration and extracts the configuration of
         all its Linear modules
         :return: a list of Linear configuration extracted from architectures
         """
         linear_configs = []
+        linear_modules = []
         for a in self.configs_from_architectures:
             architecture = getattr(models, a)(weights=None)
-            modules = traverse_architecture_and_return_module_configs(architecture, Linear)
+            modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[torch.nn.Linear]
             for module, input_shape, layer_idx in modules:
                 new_config = {
-                    "input_size": module.out_features,
-                    "output_size": module.out_features,
-                    "batch_size": random.choice(self.module_param_configs["batch_size"]),
-                    "note": f"{a}(layer_idx:{layer_idx})"
-                }
+                                  "input_size": module.in_features,
+                                  "output_size": module.out_features,
+                                  "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
+                                  "note": f"{a}(layer_idx:{layer_idx})"
+                              }
                 linear_configs.append(new_config)
-        return linear_configs
+                linear_modules.append(module)
+        return linear_configs, linear_modules
 
     def initialize_module(self, config) -> torch.nn.Linear:
         """
@@ -66,7 +72,7 @@ class LinearDataCollector(DataCollector):
         """
         generates a random tensor of the correct size given the configuration
         :param config: the module configuration
-        :return: the tensor representing the "image"
+        :return: the tensor representing the generated data
         """
         return torch.rand(config["batch_size"], config["input_size"])
 
@@ -74,8 +80,16 @@ class LinearDataCollector(DataCollector):
         """
         starts the data collection
         """
+        random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
+        a_configs, a_modules = [], []
+        if self.configs_from_architectures:
+            a_configs, a_modules = self.get_linear_configs_from_architectures()
+        self.print_data_collection_info(random_configs + a_configs)
+
         print("Doing random configs...")
-        self.run_data_collection()
+        modules = [self.initialize_module(config) for config in random_configs]
+        self.run_data_collection_multiple_configs(random_configs, modules)
+
         if self.configs_from_architectures:
             print("Doing architecture configs...")
-            self.run_data_collection(custom_configs=self.get_linear_configs_from_architectures())
+            self.run_data_collection_multiple_configs(a_configs, a_modules)

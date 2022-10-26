@@ -2,17 +2,15 @@ import abc
 import math
 import time
 import torch
-import random
+import numpy as np
 from collections.abc import Iterable
 from functools import reduce
 from itertools import product
 from operator import mul
-from random import choice
 from warnings import warn
 from codecarbon import EmissionsTracker
 from ptflops import get_model_complexity_info
 from tqdm import tqdm
-random.seed = 111111
 
 
 class DataCollector(abc.ABC):
@@ -25,6 +23,7 @@ class DataCollector(abc.ABC):
             num_repeat_config,
             random_sampling,
             output_path,
+            seed
     ):
         """
         :param module_param_configs: dictionary which contains all possible values for a PyTorch module's parameters
@@ -33,6 +32,7 @@ class DataCollector(abc.ABC):
         :param num_repeat_config: no. of times a configuration should be repeated
         :param random_sampling: if False all possible combinations will be measured (Attention: can explode quickly)
         :param output_path: specifies the desired path and name to the output file with the measurements
+        :param seed: specifies the seed for random sampling
         """
         self.module_param_configs = module_param_configs
         self.sampling_timeout = sampling_timeout
@@ -40,6 +40,8 @@ class DataCollector(abc.ABC):
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
         self.output_path = output_path
+        if seed:
+            np.random.seed(seed)
 
     @abc.abstractmethod
     def generate_data(self, config) -> torch.Tensor:
@@ -50,14 +52,14 @@ class DataCollector(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def validate_config(self, module, data_dim):
+    def validate_config(self, config):
         """
         validates the current configuration. e.g. Conv2D the kernel-size cannot be larger than the image-size
         """
         pass
 
     @staticmethod
-    def count_macs(module, data_dims) -> int:
+    def count_module_macs(module, data_dims) -> int:
         """
         computes the MACs for a given PyTorch module
         :param: module: the PyTorch module for which the MACs should be counted
@@ -106,51 +108,65 @@ class DataCollector(abc.ABC):
             warn("No sampling cutoff count provided. All possible combinations will be measured.")
             sampling_cutoff = reduce(mul, (len(lst) for lst in self.module_param_configs.values()))
 
-        config_list = []
+        configs_list = []
         if random_sampling:
-            for i in range(1, sampling_cutoff + 1):
-                new_config = {param: choice(values) for param, values in self.module_param_configs.items()}
+            i = 0
+            while i < sampling_cutoff:
+                new_config = {param: np.random.choice(values) for param, values in self.module_param_configs.items()}
                 new_config["note"] = "empty"
-                config_list.append(new_config)
+                if self.validate_config(new_config):
+                    configs_list.append(new_config)
+                    i += 1
         else:
             # get all possible parameter combinations from the predefined ranges
             combinations = product(*self.module_param_configs.values())
             for comb in combinations:
-                new_config = {self.module_param_configs.keys()[idx]: value for idx, value in enumerate(comb)}
+                new_config = {list(self.module_param_configs.keys())[idx]: value for idx, value in enumerate(comb)}
                 new_config["note"] = "empty"
-                config_list.append(new_config)
-        return config_list
+                if self.validate_config(new_config):
+                    configs_list.append(new_config)
+        return configs_list
 
-    def run_data_collection(self, custom_configs=None) -> None:
+    def print_data_collection_info(self, configs) -> None:
         """
-        starts the data-collection process
-        :param custom_configs: allows the use of custom configurations
+        prints the total number of iterations and the approx min. time it will take to collect the data
+        :param configs: the configs to be measured
         """
-        if custom_configs:
-            configs = custom_configs
-        else:
-            configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
         print("Total number of iterations: ", len(configs) * self.num_repeat_config)
         compute_time_in_hours = round(len(configs) * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
 
-        pbar = tqdm(configs)
-        for config in pbar:
-            pbar.set_description(f"current config:[{self.config_to_string(config)}]")
-            module = self.initialize_module(config)
-            data = self.generate_data(config)
-            # some modules such as e.g. Conv2d have parameter requirements i.e. kernel-size < image-size
-            while not self.validate_config(module, data.shape):
-                config = self.generate_module_configurations(self.random_sampling, 1)[0]
-                module = self.initialize_module(config)
-                data = self.generate_data(config)
+    def run_data_collection_multiple_configs(self, configs, modules) -> None:
+        """
+        runs the data-collection for multiple configurations of PyTorch nn.Modules
+        :param configs: the configs dictionaries
+        :param modules: the PyTorch module instances corresponding to the configs
+        """
+        pb = tqdm(list(zip(configs, modules)))
+        for config, module in pb:
+            pb.set_description(f"current config:[{self.config_to_string(config)}]")
             module.eval()
             for rep_no in range(1, self.num_repeat_config + 1):
-                 self.run_forward_passes(config, module, data, rep_no, self.output_path)
-            #except:
-            #    warn(f"An error occurred while processing this config [{config}]\n")
+                data = self.generate_data(config)
+                # try:
+                self.run_forward_passes(config, module, data, rep_no, self.output_path)
+                # except:
+                #    warn(f"An error occurred while processing this config [{config}]\n")
 
-        print("----- Finished -----")
+    def run_data_collection_single_config(self, config, module, data) -> None:
+        """
+        runs the data-collection for a single configuration of a PyTorch nn.Module
+        :param config: the config dictionary
+        :param module: the PyTorch module instance
+        :param data: the data to be used for this single configuration
+        :return:
+        """
+        module.eval()
+        for rep_no in range(1, self.num_repeat_config + 1):
+            # try:
+            self.run_forward_passes(config, module, data, rep_no, self.output_path)
+            # except:
+            #    warn(f"An error occurred while processing this config [{config}]\n")
 
     def run_forward_passes(self, config, module, data, rep_no, output_path="./output.csv") -> None:
         """
@@ -163,7 +179,7 @@ class DataCollector(abc.ABC):
         """
         config_str = self.config_to_string(config)
         tracker = EmissionsTracker(
-            project_name=f"module:{type(module).__name__},rep_no:{rep_no},macs:{self.count_macs(module, data.shape)},{config_str}",
+            project_name=f"module:{type(module).__name__},rep_no:{rep_no},macs:{self.count_module_macs(module, data.shape)},{config_str}",
             save_to_file=True,
             output_file=output_path,
             log_level='warning',
