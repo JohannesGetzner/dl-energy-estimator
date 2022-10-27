@@ -39,3 +39,27 @@ def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
     if save_to_csv:
         df.to_csv(re.sub(r'(.+)(-raw)(.csv)', r'\1' + '-parsed' + r'\3', path))
     return df
+
+
+def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True) -> pd.DataFrame:
+    """
+    this function normalizes the measured energy_values by the number of forward-passes and aggregates repeated configs
+    :param df: the pd.DataFrame containing the data from the parsed codecarbon output
+    :param param_cols: the parameter names of the module configuration
+    :param aggregate: whether to compute the mean-energy of configurations that are identical
+    :return: the preprocessed pd.DataFrame
+    """
+    if (df["cpu_energy"] < 0).any():
+        previous_shape = df.shape
+        df = df.loc[(df["cpu_energy"] > 0) & (df['gpu_energy'] > 0)]
+        warn(f"{previous_shape[0] - df.shape[0]} negative energy values detected! These data points have been removed.")
+    energy_cols = [col_name for col_name in df.columns if 'energy' in col_name]
+    for col in energy_cols:
+        df[col] = df[col].div(df['forward_passes'])
+    if aggregate:
+        previous_shape = df.shape
+        df = df.groupby(param_cols, sort=False).mean(numeric_only=True)
+        df.reset_index(inplace=True)
+        print(
+            f"Shape before aggregation: {previous_shape}, after aggregation: {df.shape} (non numeric columns removed)")
+    return df
