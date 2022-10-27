@@ -4,7 +4,7 @@ from torch.nn.modules import Linear
 from torchvision import models
 from data_collectors._data_collector import DataCollector
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
-from tqdm import tqdm
+from utils.data_utils import parse_codecarbon_output
 
 
 class LinearDataCollector(DataCollector):
@@ -32,7 +32,7 @@ class LinearDataCollector(DataCollector):
             np.random.seed(seed)
         self.configs_from_architectures = configs_from_architectures
 
-    def validate_config(self,  config) -> bool:
+    def validate_config(self, config) -> bool:
         return True
 
     def get_linear_configs_from_architectures(self) -> [({}, torch.nn.Module)]:
@@ -48,11 +48,11 @@ class LinearDataCollector(DataCollector):
             modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[torch.nn.Linear]
             for module, input_shape, layer_idx in modules:
                 new_config = {
-                                  "input_size": module.in_features,
-                                  "output_size": module.out_features,
-                                  "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
-                                  "note": f"{a}(layer_idx:{layer_idx})"
-                              }
+                    "input_size": module.in_features,
+                    "output_size": module.out_features,
+                    "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
+                    "note": f"{a}(layer_idx:{layer_idx})"
+                }
                 linear_configs.append(new_config)
                 linear_modules.append(module)
         return linear_configs, linear_modules
@@ -85,7 +85,6 @@ class LinearDataCollector(DataCollector):
         if self.configs_from_architectures:
             a_configs, a_modules = self.get_linear_configs_from_architectures()
         self.print_data_collection_info(random_configs + a_configs)
-
         print("Doing random configs...")
         modules = [self.initialize_module(config) for config in random_configs]
         self.run_data_collection_multiple_configs(random_configs, modules)
@@ -93,3 +92,4 @@ class LinearDataCollector(DataCollector):
         if self.configs_from_architectures:
             print("Doing architecture configs...")
             self.run_data_collection_multiple_configs(a_configs, a_modules)
+        parse_codecarbon_output(self.output_path)

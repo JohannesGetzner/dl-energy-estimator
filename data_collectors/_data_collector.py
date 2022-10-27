@@ -182,7 +182,7 @@ class DataCollector(abc.ABC):
         tracker = EmissionsTracker(
             project_name=f"module:{type(module).__name__},rep_no:{rep_no},macs:{self.count_module_macs(module, data.shape)},{config_str}",
             save_to_file=True,
-            output_file=output_path,
+            output_file=self.output_path,
             log_level='warning',
             measure_power_secs=15
         )

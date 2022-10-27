@@ -16,13 +16,13 @@ module_configurations:
       # discrete values to avoid a combinatorial explosion.
       random_sampling: True
       # number of samples if random_sampling True
-      sampling_cutoff: 10
+      sampling_cutoff: 1
       # number of times a config should be repeated
       num_repeat_config: 1
       # PyTorch's architectures to extract specific configurations from
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      configs_from_architectures: [ 'alexnet']
       # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
-      output_path: "./data/conv2d-energies.csv"
+      output_path: "./data/test.csv"
     module_params:
       # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
       batch_size: [ 1,25,1 ]

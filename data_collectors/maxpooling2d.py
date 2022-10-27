@@ -4,6 +4,7 @@ from torch.nn import MaxPool2d
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
 from torchvision import models
 from data_collectors._data_collector import DataCollector
+from utils.data_utils import parse_codecarbon_output
 
 
 class MaxPooling2dDataCollector(DataCollector):
@@ -110,3 +111,4 @@ class MaxPooling2dDataCollector(DataCollector):
         if self.configs_from_architectures:
             print("Doing architecture configs...")
             self.run_data_collection_multiple_configs(a_configs, a_modules)
+        parse_codecarbon_output(self.output_path)

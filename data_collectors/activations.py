@@ -1,6 +1,7 @@
 import torch
 from torch.nn.modules import ReLU, Sigmoid, Tanh, Softmax
 from data_collectors._data_collector import DataCollector
+from utils.data_utils import parse_codecarbon_output
 
 
 class ActivationsDataCollector(DataCollector):
@@ -69,3 +70,4 @@ class ActivationsDataCollector(DataCollector):
             modules += [self.initialize_module(a) for i in range(self.sampling_cutoff)]
         print("Doing random configs...")
         self.run_data_collection_multiple_configs(random_configs, modules)
+        parse_codecarbon_output(self.output_path)

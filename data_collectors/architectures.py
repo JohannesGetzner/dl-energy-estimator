@@ -5,6 +5,8 @@ from data_collectors._data_collector import DataCollector
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
 from tqdm import tqdm
 
+from utils.data_utils import parse_codecarbon_output
+
 
 class ArchitecturesDataCollector(DataCollector):
 
@@ -91,3 +93,4 @@ class ArchitecturesDataCollector(DataCollector):
                             input_shape = config["batch_size"], input_shape[1], input_shape[2], input_shape[3]
                         data_m = torch.rand(input_shape)
                         self.run_data_collection_single_config(config, module, data_m)
+        parse_codecarbon_output(self.output_path)
