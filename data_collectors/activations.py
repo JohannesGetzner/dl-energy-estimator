@@ -7,7 +7,7 @@ class ActivationsDataCollector(DataCollector):
 
     def __init__(self,
                  module_param_configs,
-                 output_path="./out.csv",
+                 output_path,
                  sampling_cutoff=500,
                  num_repeat_config=1,
                  random_sampling=True,

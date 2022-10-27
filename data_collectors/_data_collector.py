@@ -2,6 +2,7 @@ import abc
 import math
 import time
 import torch
+import re
 import numpy as np
 from collections.abc import Iterable
 from functools import reduce
@@ -39,7 +40,7 @@ class DataCollector(abc.ABC):
         self.sampling_cutoff = sampling_cutoff
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
-        self.output_path = output_path
+        self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2', output_path)
         if seed:
             np.random.seed(seed)
 
@@ -168,7 +169,7 @@ class DataCollector(abc.ABC):
             # except:
             #    warn(f"An error occurred while processing this config [{config}]\n")
 
-    def run_forward_passes(self, config, module, data, rep_no, output_path="./output.csv") -> None:
+    def run_forward_passes(self, config, module, data, rep_no, output_path) -> None:
         """
         computes the forward-passes through the module and records the energy consumption
         :param rep_no: current number of the config repetition
