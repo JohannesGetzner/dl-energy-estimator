@@ -46,13 +46,19 @@ def traverse_architecture_and_return_module_configs(a, by_type=False):
     for module in modules:
         modules_by_type[type(module)] = []
 
-    sample_input = torch.rand((1, 3, 224, 224))
+    sample_input = torch.rand((1, 3, 244, 244))
     for idx, module in enumerate(modules):
         if isinstance(module, nn.Linear):
             sample_input = torch.flatten(sample_input)
         # tuple is (module, input_shape, module_layer_index)
         modules_by_type[type(module)].append((module, sample_input.shape, idx))
         modules_by_order.append((module, sample_input.shape, idx))
+        if isinstance(module, nn.Conv2d):
+            if sample_input.shape[1] != module.in_channels:
+                print("INFO: number of input-channels for Conv2D don't match. This is likely due to skip connections")
+                sample_input = torch.rand(
+                    (sample_input.shape[0], module.in_channels, sample_input.shape[2], sample_input.shape[2]))
+        module.eval()
         sample_input = module(sample_input)
     if by_type:
         return modules_by_type
