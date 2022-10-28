@@ -1,0 +1,79 @@
+---
+# data collection configuration
+sampling_timeout: 5
+# specify a seed for reproducible results; leave empty if no seed should be used
+seed: 1111
+modules: [ "conv2d", "maxpooling2d", "linear", "activations" ]
+module_configurations:
+  # ----
+  # Conv2d Module
+  # ----
+  conv2d:
+    meta:
+      # ATTENTION: if False a grid-search will be used instead and thus all possible (valid) parameter combinations will be
+      # computed. For this reason if random_sampling=False, the values for 'module-params' below will be interpreted
+      # as a list of values. Additionally, the parameter 'sampling_cutoff' will have no effect.
+      # discrete values to avoid a combinatorial explosion.
+      random_sampling: True
+      # number of samples if random_sampling True
+      sampling_cutoff: 5
+      # number of times a config should be repeated
+      num_repeat_config: 3
+      # PyTorch's architectures to extract specific configurations from
+      configs_from_architectures: [ ]
+      # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
+      output_path: "./data/conv2d-energies.csv"
+    module_params:
+      # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
+      batch_size: [ 1,25,1 ]
+      image_size: [ 4,22,1 ]
+      kernel_size: [ 1,12,1 ]
+      in_channels: [ 1,51,1 ]
+      out_channels: [ 1,51,1 ]
+      stride: [ 1,6,1 ]
+      padding: [ 0,4,1 ]
+  # ----
+  # MaxPool2d Module
+  # ----
+#  maxpooling2d:
+#    meta:
+#      random_sampling: True
+#      sampling_cutoff: 10
+#      num_repeat_config: 1
+#      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+#      output_path: "./data/maxpooling2d-energies.csv"
+#    module_params:
+#      batch_size: [ 1,257,1 ]
+#      image_size: [ 4,225,1 ]
+#      kernel_size: [ 1,12,1 ]
+#      in_channels: [ 1,513,1 ]
+#      stride: [ 1,6,1 ]
+#      padding: [ 0,4,1 ]
+#  # ----
+#  # Linear Module
+#  # ----
+#  linear:
+#    meta:
+#      random_sampling: True
+#      sampling_cutoff: 10
+#      num_repeat_config: 1
+#      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+#      output_path: "./data/linear-energies.csv"
+#    module_params:
+#      batch_size: [ 1,513,1 ]
+#      input_size: [ 1,5001,1 ]
+#      output_size: [ 1,5001,1 ]
+#  # ----
+#  # Activations Module
+#  # ----
+#  activations:
+#    meta:
+#      random_sampling: True
+#      # no. of samples for each type of activation
+#      sampling_cutoff: 10
+#      num_repeat_config: 1
+#      activation_types: [ 'relu','tanh','sigmoid','softmax' ]
+#      output_path: "./data/activations-energies.csv"
+#    module_params:
+#      batch_size: [ 1,513,1 ]
+#      input_size: [ 1000,3000000,1 ]

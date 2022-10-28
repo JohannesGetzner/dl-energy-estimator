@@ -84,6 +84,6 @@ def run_data_collection(collectors_to_run) -> None:
 
 
 if __name__ == '__main__':
-    configuration = load_configuration(path='./configuration.yaml')
+    configuration = load_configuration(path='data_collection_config.yaml')
     collectors = load_data_collectors(configuration)
     run_data_collection(collectors)
