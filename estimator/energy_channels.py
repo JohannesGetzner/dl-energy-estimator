@@ -10,12 +10,17 @@ from dataclasses import dataclass
 
 
 class EnergyChannel(abc.ABC):
-    features_config: {}
-    batch_size: int
-    model_version: str
+    # TODO: only load model once per session
 
     @classmethod
     def get_path(cls, version, base_dir, path_type):
+        """
+        constructs the path to the mode, pre- or postprocessor
+        :param version: the version of the model, pre- or postprocessor
+        :param base_dir: the base directory
+        :param path_type: the type of to load: model, pre- or postprocessor
+        :return: the path to the serialized model, pre- or postprocessor to load
+        """
         files_list = [
             file
             for file in sorted(os.listdir(base_dir))
@@ -33,10 +38,13 @@ class EnergyChannel(abc.ABC):
         print(f"    Loaded {path_type} --- {final_path} for {cls.__name__}")
         return final_path
 
-    # TODO: only load model once per session
-
     @classmethod
     def load_model(cls, model_version):
+        """
+        loads the model, which predicts the energy for the given channel
+        :param model_version: the version of the model to load
+        :return: the model
+        """
         print(f"Loading model for {cls.__name__}...")
         models_dir = os.path.join(os.path.dirname(__file__), "energy_models/")
         model_path = cls.get_path(model_version, models_dir, 'model')
@@ -48,6 +56,11 @@ class EnergyChannel(abc.ABC):
 
     @classmethod
     def load_feature_preprocessors(cls, model_version):
+        """
+        loads the features preprocessor for the given channel
+        :param model_version: the version of the preprocessor
+        :return: the preprocessor
+        """
         print(f"Loading preprocessors for {cls.__name__}...")
         preprocessors_dir = os.path.join(os.path.dirname(__file__), "feature_preprocessors/")
         preprocessor_path = cls.get_path(model_version, preprocessors_dir, 'preprocessor')
@@ -59,6 +72,11 @@ class EnergyChannel(abc.ABC):
 
     @classmethod
     def load_target_variable_postprocessor(cls, model_version):
+        """
+        loads the energy value postprocessor for the given channel
+        :param model_version:  the version of the postprocessor
+        :return: the postprocessor
+        """
         print(f"Loading postprocessor for {cls.__name__}...")
         postprocessors_dir = os.path.join(os.path.dirname(__file__), "target_postprocessors/")
         postprocessor_path = cls.get_path(model_version, postprocessors_dir, 'postprocessor')
@@ -70,14 +88,28 @@ class EnergyChannel(abc.ABC):
 
     @abc.abstractmethod
     def compute_energy_estimate(self):
+        """
+        computes the energy estimate for the given channel
+        :return: the postprocessed energy value
+        """
         pass
 
     @abc.abstractmethod
     def compute_macs(self):
+        """
+        computes the number of MACs for the given channel
+        :return: the MACs
+        """
         pass
 
     def construct_features(self):
+        """
+        given the channel, and the configuration returns the features for the model without preprocessing
+        :return: a list of feature values
+        """
+        # TODO: consider making feautres a dictionary
         features = []
+        # TODO: resolve property warnings
         if len(self.features_config["base_features"]) != 0:
             features += [getattr(self, feature_name) for feature_name in self.features_config["base_features"]]
             if self.features_config["enable_log_features"]:
@@ -104,6 +136,9 @@ class IdentityEnergyChannel(EnergyChannel):
 
 @dataclass
 class LinearEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Linear module
+    """
     model_version: str
     features_config: dict
     batch_size: int
@@ -136,6 +171,9 @@ class LinearEnergyChannel(EnergyChannel):
 
 @dataclass
 class Conv2dEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Conv2d module
+    """
     model_version: str
     features_config: {}
     batch_size: int
@@ -175,6 +213,9 @@ class Conv2dEnergyChannel(EnergyChannel):
 
 @dataclass
 class MaxPooling2dEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the MaxPooling2d module
+    """
     model_version: str
     features_config: {}
     batch_size: int
@@ -210,6 +251,9 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
 
 @dataclass
 class ActivationsEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Activation functions
+    """
     model_version: str
     features_config: {}
     batch_size: int
