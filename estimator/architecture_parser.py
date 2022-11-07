@@ -21,7 +21,10 @@ def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, features_
     singledispatch function to parse a PyTorch Module into a custom channel class
     individual implementations for each module below
     :param module_to_parse: the module to be parsed
-    :param sample_input: a sample input to the module with the correct dimensions
+    :param sample_input_dims: correct data-dimensions as input to the model
+    :param features_config: the features configuration for the give module from 'estimation_config.yaml'
+    :param model_version: the version of the model to load
+    :param batch_size: the batch_size of the forward pass
     :return: the custom channel class or None if the there is no matching channel implementation
     """
     warn(f"Skipping Layer: No EnergyChannel implemented for {module_to_parse}")
@@ -31,6 +34,9 @@ def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, features_
 @_parse_torch_module.register
 def _(module_to_parse: nn.Linear, sample_input_dims, features_config, model_version,
       batch_size) -> LinearEnergyChannel:
+    """
+    hook for the which parses a nn.Linear to the LinearEnergyChannel
+    """
     return LinearEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -43,6 +49,10 @@ def _(module_to_parse: nn.Linear, sample_input_dims, features_config, model_vers
 @_parse_torch_module.register
 def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> Conv2dEnergyChannel:
+    """
+    hook for the which parses a nn.Conv2d to the Conv2dEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return Conv2dEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -59,6 +69,10 @@ def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, features_conf
 @_parse_torch_module.register
 def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> MaxPooling2dEnergyChannel:
+    """
+    hook for the which parses a nn.MaxPool2d to the MaxPooling2dEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return MaxPooling2dEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -74,6 +88,10 @@ def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_c
 @_parse_torch_module.register
 def _(module_to_parse: nn.ReLU, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> ActivationsEnergyChannel:
+    """
+    hook for the which parses a nn.ReLU to the ActivationsEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return ActivationsEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -86,6 +104,10 @@ def _(module_to_parse: nn.ReLU, sample_input_dims: torch.Tensor, features_config
 @_parse_torch_module.register
 def _(module_to_parse: nn.Sigmoid, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> ActivationsEnergyChannel:
+    """
+    hook for the which parses a nn.Sigmoid to the ActivationsEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return ActivationsEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -98,6 +120,10 @@ def _(module_to_parse: nn.Sigmoid, sample_input_dims: torch.Tensor, features_con
 @_parse_torch_module.register
 def _(module_to_parse: nn.Tanh, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> ActivationsEnergyChannel:
+    """
+    hook for the which parses a nn.Tanh to the ActivationsEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return ActivationsEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -110,6 +136,10 @@ def _(module_to_parse: nn.Tanh, sample_input_dims: torch.Tensor, features_config
 @_parse_torch_module.register
 def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, features_config: {},
       model_version, batch_size) -> ActivationsEnergyChannel:
+    """
+    hook for the which parses a nn.Softmax to the ActivationsEnergyChannel
+    refer to _parse_torch_module for explanation of parameters
+    """
     return ActivationsEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
@@ -120,6 +150,13 @@ def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, features_con
 
 
 def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [EnergyChannel]:
+    """
+    iterates over the modules of a torchvision.models architecture and parses each module to the corresponding channel
+    :param architecture: the torchvision.models architecture
+    :param batch_size:  the batch_size associated with the forward pass
+    :param config: the configuration of the channels from 'estimation_config.yaml'
+    :return: a list of parsed channels
+    """
     modules = traverse_architecture_and_return_module_configs(architecture, by_type=False)
     channels = []
     for m, input_shape, module_idx in modules:
@@ -135,10 +172,3 @@ def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [Ene
         channel = _parse_torch_module(m, input_shape, features_config, model_version, batch_size)
         channels.append(channel)
     return channels
-
-
-if __name__ == '__main__':
-    from torchvision.models import resnet18
-
-    a = resnet18(weights=None)
-    parse_architecture(a, 5)
