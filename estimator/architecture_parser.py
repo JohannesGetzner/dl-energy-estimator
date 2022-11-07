@@ -2,10 +2,9 @@ import math
 from functools import singledispatch
 from warnings import warn
 import torch
-import yaml
 from torch import nn
 from utils.architecture_utils import traverse_architecture_and_return_module_configs
-from energy_channels import (
+from .energy_channels import (
     IdentityEnergyChannel,
     LinearEnergyChannel,
     Conv2dEnergyChannel,
@@ -120,22 +119,16 @@ def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, features_con
     )
 
 
-def parse_architecture(architecture: nn.Module, batch_size: int) -> [EnergyChannel]:
-    with open('../estimation_config.yaml', "r") as stream:
-        try:
-            config = yaml.safe_load(stream)
-        except yaml.YAMLError as exc:
-            print(exc)
-
+def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [EnergyChannel]:
     modules = traverse_architecture_and_return_module_configs(architecture, by_type=False)
     channels = []
     for m, input_shape, module_idx in modules:
         if str(type(m).__name__).lower() in ['sigmoid', 'relu', 'softmax', 'tanh']:
-            features_config = config["model_configurations"]['activations']['features_config']
-            model_version = config["model_configurations"]['activations']['model_version']
-        elif str(type(m).__name__).lower() in config["model_configurations"].keys():
-            features_config = config["model_configurations"][str(type(m).__name__).lower()]['features_config']
-            model_version = config["model_configurations"][str(type(m).__name__).lower()]['model_version']
+            features_config = config['activations']['features_config']
+            model_version = config['activations']['model_version']
+        elif str(type(m).__name__).lower() in config.keys():
+            features_config = config[str(type(m).__name__).lower()]['features_config']
+            model_version = config[str(type(m).__name__).lower()]['model_version']
         else:
             features_config = {}
             model_version = ''
