@@ -33,6 +33,8 @@ class EnergyChannel(abc.ABC):
         print(f"    Loaded {path_type} --- {final_path} for {cls.__name__}")
         return final_path
 
+    # TODO: only load model once per session
+
     @classmethod
     def load_model(cls, model_version):
         print(f"Loading model for {cls.__name__}...")
