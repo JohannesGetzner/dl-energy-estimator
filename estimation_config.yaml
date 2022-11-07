@@ -3,13 +3,13 @@ test_data_path: ''
 model_configurations:
   conv2d:
     features_config:
-      base_features: [ 'in_channels','out_channels','image_size','image_height','padding','kernel_size','stride','batch_size' ]
+      base_features: [ 'in_channels','out_channels','image_size','padding','kernel_size','stride','batch_size' ]
       enable_log_features: True
       enable_macs_feature: True
     model_version: ''
   maxpool2d:
     features_config:
-      base_features: [ 'in_channels','image_size','image_height','padding','kernel_size','stride','batch_size' ]
+      base_features: [ 'in_channels','image_size','padding','kernel_size','stride','batch_size' ]
       enable_log_features: True
       enable_macs_feature: True
     model_version: ''

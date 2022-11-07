@@ -39,7 +39,7 @@ class EnergyChannel(abc.ABC):
         models_dir = os.path.join(os.path.dirname(__file__), "energy_models/")
         model_path = cls.get_path(model_version, models_dir, 'model')
         if model_path == '':
-            model = FunctionTransformer(lambda x: x)
+            model = None
         else:
             model = load(model_path)
         return model
@@ -125,9 +125,10 @@ class LinearEnergyChannel(EnergyChannel):
         preprocessed_features = preprocessor.transform(
             [features]
         )
-        energy_estimate = self.load_model(model_version=self.model_version).predict([*preprocessed_features])
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
         return (
-            postprocessor.inverse_transform([energy_estimate])[0].item()
+            postprocessor.inverse_transform([energy_estimate])[0]
         )
 
 
@@ -139,16 +140,16 @@ class Conv2dEnergyChannel(EnergyChannel):
     in_channels: int
     image_size: int
     out_channels: int
-    kernel: (int, int)
-    stride: (int, int)
-    padding: (int, int)
+    kernel_size: int
+    stride: int
+    padding: int
 
     def compute_macs(self):
         macs, params = get_model_complexity_info(
             torch.nn.Conv2d(
                 in_channels=self.in_channels,
                 out_channels=self.out_channels,
-                kernel_size=self.kernel,
+                kernel_size=self.kernel_size,
                 stride=self.stride,
                 padding=self.padding),
             (self.in_channels, self.image_size, self.image_size),
@@ -165,10 +166,9 @@ class Conv2dEnergyChannel(EnergyChannel):
         preprocessed_features = preprocessor.transform(
             [features]
         )
-        energy_estimate = self.load_model(model_version=self.model_version).predict([*preprocessed_features])
-        return (
-            postprocessor.inverse_transform([energy_estimate])[0].item()
-        )
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        return postprocessor.inverse_transform([energy_estimate])[0]
 
 
 @dataclass
@@ -177,17 +177,16 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
     features_config: {}
     batch_size: int
     in_channels: int
-    image_width: int
-    image_height: int
-    kernel: (int, int)
-    stride: (int, int)
+    image_size: int
+    kernel_size: int
+    stride: int
     padding: int
 
     def compute_macs(self):
-        s = self.stride[0]
-        k = self.kernel[0]
+        s = self.stride
+        k = self.kernel_size
         # TODO: evaluate formula with padding
-        flops = math.pow(k, 2) * math.pow(math.floor((self.image_width - k + 2 * self.padding) / s + 1),
+        flops = math.pow(k, 2) * math.pow(math.floor((self.image_size - k + 2 * self.padding) / s + 1),
                                           2) * self.in_channels
         flops = flops * self.batch_size
         macs = flops / 2
@@ -200,9 +199,10 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
         preprocessed_features = preprocessor.transform(
             [features]
         )
-        energy_estimate = self.load_model(model_version=self.model_version).predict([*preprocessed_features])
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
         return (
-            postprocessor.inverse_transform([energy_estimate])[0].item()
+            postprocessor.inverse_transform([energy_estimate])[0]
         )
 
 
@@ -231,7 +231,8 @@ class ActivationsEnergyChannel(EnergyChannel):
         preprocessed_features = preprocessor.transform(
             [features]
         )
-        energy_estimate = self.load_model(model_version=self.model_version).predict([*preprocessed_features])
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
         return (
-            postprocessor.inverse_transform([energy_estimate])[0].item()
+            postprocessor.inverse_transform([energy_estimate])[0]
         )

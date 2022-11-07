@@ -50,9 +50,9 @@ def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, features_conf
         features_config=features_config,
         in_channels=module_to_parse.in_channels,
         out_channels=module_to_parse.out_channels,
-        padding=module_to_parse.padding,
-        stride=module_to_parse.stride,
-        kernel=module_to_parse.kernel_size,
+        padding=module_to_parse.padding[0],
+        stride=module_to_parse.stride[0],
+        kernel_size=module_to_parse.kernel_size[0],
         image_size=sample_input_dims[2]
     )
 
@@ -66,9 +66,8 @@ def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_c
         features_config=features_config,
         in_channels=sample_input_dims[1],
         stride=module_to_parse.stride,
-        kernel=module_to_parse.kernel_size,
-        image_width=sample_input_dims[2],
-        image_height=sample_input_dims[3],
+        kernel_size=module_to_parse.kernel_size,
+        image_size=sample_input_dims[2],
         padding=module_to_parse.padding
     )
 
