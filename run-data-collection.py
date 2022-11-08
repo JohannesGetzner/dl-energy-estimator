@@ -4,6 +4,7 @@ import yaml
 from data_collectors._data_collector import DataCollector
 from data_collectors import Conv2dDataCollector
 from data_collectors.activations import ActivationsDataCollector
+from data_collectors.architectures import ArchitecturesDataCollector
 from data_collectors.linear import LinearDataCollector
 from data_collectors.maxpooling2d import MaxPooling2dDataCollector
 
@@ -11,7 +12,8 @@ data_collectors = {
     "conv2d": Conv2dDataCollector,
     "linear": LinearDataCollector,
     "maxpooling2d": MaxPooling2dDataCollector,
-    "activations": ActivationsDataCollector
+    "activations": ActivationsDataCollector,
+    "architectures": ArchitecturesDataCollector
 }
 
 
@@ -30,16 +32,17 @@ def load_configuration(path) -> dict:
     return config
 
 
-def load_data_collectors(module_configs) -> {str: DataCollector}:
+def load_data_collectors(data_collection_config) -> {str: DataCollector}:
     """
     this method instantiates the DataCollectors specified in the configuration file
-    :param module_configs: the configuration dict
+    :param data_collection_config: the configuration dict
     :return: a dict containing the DataCollector instances
     """
     collectors_dict = {}
-    seed = module_configs['seed']
-    sampling_timeout = module_configs['sampling_timeout']
-    for module_name, config in module_configs["module_configurations"].items():
+    seed = data_collection_config['seed']
+    sampling_timeout = data_collection_config['sampling_timeout']
+    for module_name in data_collection_config["to_sample"]:
+        config = data_collection_config["module_configurations"][module_name]
         print(f"Loading [{module_name}] data-collector")
         if not config['meta']['random_sampling']:
             print("Attention: grid-search enabled. Computing all possible (valid) parameter combinations.")
@@ -55,6 +58,20 @@ def load_data_collectors(module_configs) -> {str: DataCollector}:
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling']
+            )
+        elif module_name == 'architectures':
+            collector = ArchitecturesDataCollector(
+                sampling_timeout=sampling_timeout,
+                seed=seed,
+                module_param_configs={param: range(*value) if config['meta']['random_sampling'] else value for
+                                      param, value in
+                                      config['module_params'].items()},
+                architectures=config['meta']['architectures'],
+                output_path=config['meta']['output_path'],
+                sampling_cutoff=config['meta']['sampling_cutoff'],
+                num_repeat_config=config['meta']['num_repeat_config'],
+                random_sampling=config['meta']['random_sampling'],
+                include_module_wise_measurements=config['meta']['include_module_wise_measurements']
             )
         else:
             collector = data_collectors[module_name](
