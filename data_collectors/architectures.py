@@ -71,7 +71,6 @@ class ArchitecturesDataCollector(DataCollector):
         starts the data collection
         """
         self.print_data_collection_info()
-        print("Doing random configs...")
         for a_name in self.architectures:
             print(f"Doing {a_name}...")
             a_module = getattr(models, a_name)(weights=None)
@@ -81,12 +80,13 @@ class ArchitecturesDataCollector(DataCollector):
             for config in pbar:
                 pbar.set_description(f"current config:[{self.config_to_string(config)}]")
                 data = self.generate_data(config)
+                config["note"] = f"{a_name}(layer_idx:{0})"
                 self.run_data_collection_single_config(config, a_module, data)
                 if self.include_module_wise_measurements:
                     # run module wise measurements
                     for module, input_shape, module_idx in a_modules:
                         pbar.set_description(f"current config:[{self.config_to_string(config)}]")
-                        config["note"] = f"{a_name}(layer_idx:{module_idx})"
+                        config["note"] = f"{a_name}(layer_idx:{module_idx+1})"
                         if len(input_shape) == 1:
                             input_shape = config["batch_size"], input_shape[0]
                         else:
