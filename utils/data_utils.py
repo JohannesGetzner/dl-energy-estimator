@@ -22,6 +22,7 @@ def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
     # parse note column
     architecture_col = []
     layer_indices_col = []
+    # TODO: this may interfere with notes columns from other files
     for idx, row in df.iterrows():
         if row.note != 'empty':
             match = re.search(r"([a-z,0-9]+)\(.*:([0-9]+)\)", row.note)
