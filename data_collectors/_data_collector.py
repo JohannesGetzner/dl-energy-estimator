@@ -40,6 +40,7 @@ class DataCollector(abc.ABC):
         self.sampling_cutoff = sampling_cutoff
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
+        # TODO: add date to output file
         self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2', output_path)
         if seed:
             np.random.seed(seed)
