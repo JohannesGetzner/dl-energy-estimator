@@ -64,3 +64,39 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True) -> pd.D
         print(
             f"Shape before aggregation: {previous_shape}, after aggregation: {df.shape} (non numeric columns removed)")
     return df
+
+
+def parse_slurm_output_for_errors(path='') -> []:
+    """
+    checks the slum cluster log for codecarbon errors and returns configurations that which caused the errors
+    :param path: the path to the slurm output file
+    :return:the invalid configurations
+    """
+    file = open(path, 'r')
+    lines = file.readlines()
+    invalid_exps = []
+    current_exp = None
+    error_checked = False
+    for line in lines:
+        if line.startswith(" ----"):
+            current_exp = line
+            error_checked = False
+        elif 'ERROR' in line and not error_checked:
+            invalid_exps.append(current_exp)
+            error_checked = True
+    parsed_invalid_exps = []
+    for e in invalid_exps:
+        config = e[29:-1]
+        params = config.split(",", 9)
+        parsed_config = dict()
+        for param in params:
+            param_name = param.split(":", 1)[0]
+            param_value = param.split(":", 1)[1]
+            if param_name == 'macs':
+                param_value = param_value[:-2]
+            if param_value.isdigit():
+                param_value = int(param_value)
+            parsed_config[param_name] = param_value
+        parsed_invalid_exps.append(parsed_config)
+    print(f"Discovered {len(parsed_invalid_exps)} invalid experiments.")
+    return parsed_invalid_exps
