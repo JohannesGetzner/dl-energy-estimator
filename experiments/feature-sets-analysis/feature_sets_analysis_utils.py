@@ -2,7 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-from sklearn.linear_model import LinearRegression
+from typing import Union
+from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score
 
@@ -67,8 +68,8 @@ def compute_log_transformed_features(df: pd.DataFrame, features_to_transform: []
     return data_w_log_features, features_to_transform + new_cols
 
 
-def fit_model(model: LinearRegression, x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray,
-              plot_results=False) -> (LinearRegression, float, float):
+def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray,
+              plot_results=False) -> (Union[LinearRegression, Lasso], float, float):
     """
     fits the specified model to the training dataset, evaluates the model on the validation set and
     plots the performance
