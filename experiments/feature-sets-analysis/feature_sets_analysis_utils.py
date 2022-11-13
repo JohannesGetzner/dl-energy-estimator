@@ -1,12 +1,19 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import seaborn as sns
-
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score
 
 
-def plot_estimate_vs_ground_truth(y, y_hat):
+def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
+    """
+    creates a seaborn regression plot to visualize the estimation performance by comparing the estimates against the
+    ground-truth
+    :param y: the ground-truth
+    :param y_hat: the estimates
+    """
     plt.figure(figsize=(4, 3))
     g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=None)
     min_x = min(min(y), min(y_hat))
@@ -25,7 +32,13 @@ def plot_estimate_vs_ground_truth(y, y_hat):
     plt.show()
 
 
-def apply_data_transforms(dfs, transformers_dict):
+def apply_data_transforms(dfs: pd.DataFrame, transformers_dict: {}) -> (pd.DataFrame, {}):
+    """
+    applies scikit-learn transformations to the data
+    :param dfs: a dictionary containing the train, val and test datasets for both features and target columns
+    :param transformers_dict: the transformer instances for he features and the target column
+    :return: the transformed datasets and the dictionary with the fitted transformers
+    """
     if transformers_dict["x_preprocessors"]:
         for p in transformers_dict["x_preprocessors"]:
             dfs['x_train'] = p.fit_transform(dfs['x_train'])
@@ -38,8 +51,13 @@ def apply_data_transforms(dfs, transformers_dict):
     return dfs, transformers_dict
 
 
-def compute_log_transformed_features(df, features_to_transform):
-    # compute the log transformed features
+def compute_log_transformed_features(df: pd.DataFrame, features_to_transform: []) -> (pd.DataFrame, []):
+    """
+    applies a log transformation to the specified columns and adds the transformed columns to the dataset
+    :param df: the dataset with the columns to transform
+    :param features_to_transform: a list of column names that should be log-transformed
+    :return: the dataframe with the additional log-columns and a list of the new column names
+    """
     data_w_log_features = df.copy()
     new_cols = []
     for col in features_to_transform:
@@ -49,7 +67,19 @@ def compute_log_transformed_features(df, features_to_transform):
     return data_w_log_features, features_to_transform + new_cols
 
 
-def fit_model(model, x_train, y_train, x_val, y_val, plot_results=False):
+def fit_model(model: LinearRegression, x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray,
+              plot_results=False) -> (LinearRegression, float, float):
+    """
+    fits the specified model to the training dataset, evaluates the model on the validation set and
+    plots the performance
+    :param model: the scikit-learn regressor
+    :param x_train: the training dataset
+    :param y_train: the corresponding training target values
+    :param x_val: the validation dataset
+    :param y_val: the corresponding validation target values
+    :param plot_results: a boolean to specify whether to plot the results or not
+    :return: the fitted model, the validation R²-Score and MSE
+    """
     r2_scores = cross_val_score(
         model, x_train, y_train.ravel(), cv=2, n_jobs=-1, scoring="r2"
     )
@@ -70,7 +100,14 @@ def fit_model(model, x_train, y_train, x_val, y_val, plot_results=False):
     return model, val_score, val_mse
 
 
-def split_data_set(df, feature_names, SEED):
+def split_data_set(df:pd.DataFrame, feature_names: [], SEED: int) -> {}:
+    """
+    splits the give dataset into train-, validation- and test-set
+    :param df: the dataframe to split
+    :param feature_names: the names of the training features
+    :param SEED: the SEED to specify the random-state
+    :return: a dictionary of six datasets corresponding to train,val and test feature/target datasets
+    """
     train, val, test = np.split(df.sample(frac=1, random_state=SEED), [int(.7 * len(df)), int(.9 * len(df))])
     dfs = {
         "x_train": train[feature_names],
@@ -83,7 +120,16 @@ def split_data_set(df, feature_names, SEED):
     return dfs
 
 
-def test_model(model, x_test, y_test, plot_results=False):
+def test_model(model, x_test: np.ndarray, y_test: np.ndarray, plot_results=True) -> (
+        np.ndarray, float, float):
+    """
+    computes the estimates for the test-set and the corresponding R²-Score and MSE
+    :param model: the model to compute the estimates
+    :param x_test: the feature values
+    :param y_test: the target values
+    :param plot_results: a boolean to specify whether to plot the results or not
+    :return: the predictions, the test R²-Score and MSE
+    """
     y_hat = model.predict(x_test).reshape(-1, 1)
     test_score = model.score(x_test, y_test.ravel())
     test_mse = mean_squared_error(y_test.ravel(), y_hat)
