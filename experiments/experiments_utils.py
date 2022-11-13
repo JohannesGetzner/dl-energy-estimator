@@ -69,7 +69,7 @@ def compute_log_transformed_features(df: pd.DataFrame, features_to_transform: []
 
 
 def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_train: np.ndarray, x_val: np.ndarray, y_val: np.ndarray,
-              plot_results=False) -> (Union[LinearRegression, Lasso], float, float):
+              plot_results=False, verbose=True) -> (Union[LinearRegression, Lasso], float, float):
     """
     fits the specified model to the training dataset, evaluates the model on the validation set and
     plots the performance
@@ -90,12 +90,12 @@ def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_trai
     model = model.fit(x_train, y_train.ravel())
     val_score = model.score(x_val, y_val.ravel())
     val_mse = mean_squared_error(y_val.ravel(), model.predict(x_val))
-
-    print("-" * 20)
-    print("Average R2 Cross-Validation Score: {:.3f} (± {:.3f})".format(np.average(r2_scores), np.std(r2_scores)))
-    print("Average MSE Cross-Validation: {:.3e} (± {:.3e})".format(np.average(mses), np.std(mses)))
-    print("Validation R2 Score: {:.3f}".format(val_score))
-    print("Validation MSE: {:.3e}".format(val_mse))
+    if verbose:
+        print("-" * 20)
+        print("Average R2 Cross-Validation Score: {:.3f} (± {:.3f})".format(np.average(r2_scores), np.std(r2_scores)))
+        print("Average MSE Cross-Validation: {:.3e} (± {:.3e})".format(np.average(mses), np.std(mses)))
+        print("Validation R2 Score: {:.3f}".format(val_score))
+        print("Validation MSE: {:.3e}".format(val_mse))
     if plot_results:
         plot_estimate_vs_ground_truth(y_val, model.predict(x_val))
     return model, val_score, val_mse
@@ -121,7 +121,7 @@ def split_data_set(df:pd.DataFrame, feature_names: [], SEED: int) -> {}:
     return dfs
 
 
-def test_model(model, x_test: np.ndarray, y_test: np.ndarray, plot_results=True) -> (
+def test_model(model, x_test: np.ndarray, y_test: np.ndarray, plot_results=True, verbose=True) -> (
         np.ndarray, float, float):
     """
     computes the estimates for the test-set and the corresponding R²-Score and MSE
@@ -134,8 +134,9 @@ def test_model(model, x_test: np.ndarray, y_test: np.ndarray, plot_results=True)
     y_hat = model.predict(x_test).reshape(-1, 1)
     test_score = model.score(x_test, y_test.ravel())
     test_mse = mean_squared_error(y_test.ravel(), y_hat)
-    print("Test R2 Score: {:.3f}".format(test_score))
-    print("Test MSE: {:.3e}".format(test_mse))
+    if verbose:
+        print("Test R2 Score: {:.3f}".format(test_score))
+        print("Test MSE: {:.3e}".format(test_mse))
     if plot_results:
         plot_estimate_vs_ground_truth(y_test, y_hat)
     return y_hat, test_score, test_mse
