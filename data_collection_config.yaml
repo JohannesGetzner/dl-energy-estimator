@@ -91,4 +91,4 @@ module_configurations:
       output_path: "./data/activations-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
-      input_size: [ 100000,1000000000,1 ]
+      input_size: [ 50000,5000000,1 ]
