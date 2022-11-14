@@ -2,10 +2,10 @@
 # data collection configuration
 sampling_timeout: 1
 # specify a seed for reproducible results; leave empty if no seed should be used
-seed: 1111
+seed: 67898955
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
-to_sample: ["architectures"]
+to_sample: ["conv2d","linear","maxpooling2d","activations"]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -13,8 +13,8 @@ module_configurations:
   architectures:
     meta:
       random_sampling: True
-      sampling_cutoff: 5
-      num_repeat_config: 1
+      sampling_cutoff: 10
+      num_repeat_config: 3
       architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
       output_path: "./data/architectures-energies.csv"
       include_module_wise_measurements: True
@@ -31,7 +31,7 @@ module_configurations:
       # discrete values to avoid a combinatorial explosion.
       random_sampling: True
       # number of samples if random_sampling True
-      sampling_cutoff: 5
+      sampling_cutoff: 500
       # number of times a config should be repeated
       num_repeat_config: 3
       # PyTorch's architectures to extract specific configurations from
@@ -40,11 +40,11 @@ module_configurations:
       output_path: "./data/conv2d-energies.csv"
     module_params:
       # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
-      batch_size: [ 1,25,1 ]
-      image_size: [ 4,22,1 ]
+      batch_size: [ 1,256,1 ]
+      image_size: [ 4,225,1 ]
       kernel_size: [ 1,12,1 ]
-      in_channels: [ 1,51,1 ]
-      out_channels: [ 1,51,1 ]
+      in_channels: [ 1,513,1 ]
+      out_channels: [ 1,513,1 ]
       stride: [ 1,6,1 ]
       padding: [ 0,4,1 ]
   # ----
@@ -53,12 +53,12 @@ module_configurations:
   maxpooling2d:
     meta:
       random_sampling: True
-      sampling_cutoff: 10
-      num_repeat_config: 1
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      sampling_cutoff: 500
+      num_repeat_config: 3
+      configs_from_architectures: []
       output_path: "./data/maxpooling2d-energies.csv"
     module_params:
-      batch_size: [ 1,257,1 ]
+      batch_size: [ 1,256,1 ]
       image_size: [ 4,225,1 ]
       kernel_size: [ 1,12,1 ]
       in_channels: [ 1,513,1 ]
@@ -70,9 +70,9 @@ module_configurations:
   linear:
     meta:
       random_sampling: True
-      sampling_cutoff: 10
+      sampling_cutoff: 50
       num_repeat_config: 1
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      configs_from_architectures: []
       output_path: "./data/linear-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
@@ -85,10 +85,10 @@ module_configurations:
     meta:
       random_sampling: True
       # no. of samples for each type of activation
-      sampling_cutoff: 10
+      sampling_cutoff: 50
       num_repeat_config: 1
-      activation_types: [ 'relu','tanh','sigmoid','softmax' ]
+      activation_types: ['relu','tanh','sigmoid','softmax']
       output_path: "./data/activations-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
-      input_size: [ 1000,3000000,1 ]
+      input_size: [ 100000,1000000000,1 ]
