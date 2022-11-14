@@ -92,4 +92,4 @@ class LinearDataCollector(DataCollector):
         if self.configs_from_architectures:
             print("Doing architecture configs...")
             self.run_data_collection_multiple_configs(a_configs, a_modules)
-        parse_codecarbon_output(self.output_path)
+        # parse_codecarbon_output(self.output_path)
