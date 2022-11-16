@@ -48,10 +48,10 @@ class LinearDataCollector(DataCollector):
             modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[torch.nn.Linear]
             for module, input_shape, layer_idx in modules:
                 new_config = {
-                    "input_size": module.input_size,
-                    "output_size": module.out_features,
                     "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
-                    "note": f"{a}(layer_idx:{layer_idx})"
+                    "input_size": module.in_features,
+                    "output_size": module.out_features,
+                    "freeText": f"architecture={a};layer_idx={layer_idx}"
                 }
                 linear_configs.append(new_config)
                 linear_modules.append(module)

@@ -52,7 +52,7 @@ class Conv2dDataCollector(DataCollector):
                     "out_channels": module.out_channels,
                     "stride": module.stride[0],
                     "padding": module.padding[0],
-                    "note": f"{a}(layer_idx:{layer_idx})"
+                    "freeText": f"architecture={a};layer_idx={layer_idx}"
                 })
                 conv2d_configs.append(new_config)
                 conv2d_modules.append(module)

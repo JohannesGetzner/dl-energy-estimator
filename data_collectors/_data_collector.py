@@ -116,7 +116,7 @@ class DataCollector(abc.ABC):
             i = 0
             while i < sampling_cutoff:
                 new_config = {param: np.random.choice(values) for param, values in self.module_param_configs.items()}
-                new_config["note"] = "empty"
+                new_config["freeText"] = ""
                 if self.validate_config(new_config):
                     configs_list.append(new_config)
                     i += 1
@@ -125,7 +125,7 @@ class DataCollector(abc.ABC):
             combinations = product(*self.module_param_configs.values())
             for comb in combinations:
                 new_config = {list(self.module_param_configs.keys())[idx]: value for idx, value in enumerate(comb)}
-                new_config["note"] = "empty"
+                new_config["freeText"] = ""
                 if self.validate_config(new_config):
                     configs_list.append(new_config)
         return configs_list

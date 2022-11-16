@@ -45,13 +45,13 @@ class MaxPooling2dDataCollector(DataCollector):
             modules = traverse_architecture_and_return_module_configs(architecture, by_type=True)[MaxPool2d]
             for module, input_shape, layer_idx in modules:
                 new_config = {
+                    "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
                     "image_size": input_shape[2],
-                    "in_channels": input_shape[1],
                     "kernel_size": module.kernel_size,
+                    "in_channels": input_shape[1],
                     "stride": module.stride,
                     "padding": module.padding,
-                    "batch_size": np.random.choice(self.module_param_configs["batch_size"]),
-                    "note": f"{a}(layer_idx:{layer_idx})"
+                    "freeText": f"architecture={a};layer_idx={layer_idx}"
                 }
                 maxpool2d_configs.append(new_config)
                 maxpool2d_modules.append(module)
@@ -69,7 +69,7 @@ class MaxPooling2dDataCollector(DataCollector):
             return False
         elif config["stride"] > config["image_size"]:
             return False
-        elif config["padding"] > config["kernel_size"]/2:
+        elif config["padding"] > config["kernel_size"] / 2:
             return False
         else:
             return True
