@@ -5,7 +5,7 @@ sampling_timeout: 30
 seed: 67898955
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
-to_sample: ["conv2d","linear","maxpooling2d","activations", "architectures"]
+to_sample: [ "conv2d","linear","maxpooling2d", "architectures", "activations" ]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -55,7 +55,7 @@ module_configurations:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
-      configs_from_architectures: []
+      configs_from_architectures: [ ]
       output_path: "./data/maxpooling2d-energies.csv"
     module_params:
       batch_size: [ 1,256,1 ]
@@ -70,9 +70,9 @@ module_configurations:
   linear:
     meta:
       random_sampling: True
-      sampling_cutoff: 50
-      num_repeat_config: 1
-      configs_from_architectures: []
+      sampling_cutoff: 500
+      num_repeat_config: 3
+      configs_from_architectures: [ ]
       output_path: "./data/linear-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
@@ -85,9 +85,9 @@ module_configurations:
     meta:
       random_sampling: True
       # no. of samples for each type of activation
-      sampling_cutoff: 50
-      num_repeat_config: 1
-      activation_types: ['relu','tanh','sigmoid','softmax']
+      sampling_cutoff: 500
+      num_repeat_config: 3
+      activation_types: [ 'relu','tanh','sigmoid','softmax' ]
       output_path: "./data/activations-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]

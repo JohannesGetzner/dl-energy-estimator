@@ -74,6 +74,7 @@ class DataCollector(abc.ABC):
             s = m.stride
             k = m.kernel_size
             p = m.padding
+            # TODO: evaluate formula with regards to the padding parameter
             flops = math.pow(k, 2) * math.pow(math.floor((data_dims[2] - k + 2 * p) / s + 1), 2) * data_dims[1]
             flops = flops * data_dims[0]
             # max-pooling does not use MACs, but only FLOPs -> must convert
