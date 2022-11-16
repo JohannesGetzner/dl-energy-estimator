@@ -51,10 +51,6 @@ def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
     return df
 
 
-if __name__ == '__main__':
-    parse_codecarbon_output('../data/maxpooling2d-energies-raw.csv', save_to_csv=True)
-
-
 def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True) -> pd.DataFrame:
     """
     this function normalizes the measured energy_values by the number of forward-passes and aggregates repeated configs
