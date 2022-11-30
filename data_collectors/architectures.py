@@ -93,4 +93,4 @@ class ArchitecturesDataCollector(DataCollector):
                             input_shape = config["batch_size"], input_shape[1], input_shape[2], input_shape[3]
                         data_m = torch.rand(input_shape)
                         self.run_data_collection_single_config(config, module, data_m)
-        # parse_codecarbon_output(self.output_path)
+        parse_codecarbon_output(self.output_path)

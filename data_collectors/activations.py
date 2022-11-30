@@ -70,4 +70,4 @@ class ActivationsDataCollector(DataCollector):
             modules += [self.initialize_module(a) for i in range(self.sampling_cutoff)]
         print("Doing random configs...")
         self.run_data_collection_multiple_configs(random_configs, modules)
-        # parse_codecarbon_output(self.output_path)
+        parse_codecarbon_output(self.output_path)
