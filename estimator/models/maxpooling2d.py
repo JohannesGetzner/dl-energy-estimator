@@ -1,8 +1,8 @@
+import os
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
-
 from estimator.models._energy_model import EnergyModel
-from experiments.experiments_utils import compute_log_transformed_features, split_data_set, apply_data_transforms, \
+from experiments.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
 
 
@@ -10,18 +10,20 @@ class MaxPooling2dEnergyModel(EnergyModel):
 
     def __init__(self,
                  save_to_path_models,
-                 save_to_path_transforms
+                 save_to_path_transforms,
+                 config
                  ):
         super(MaxPooling2dEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
+            config
         )
         self.param_cols = []
 
     def fit_model(self):
-        data = self.load_data(self.param_cols, "../../data/")
-        data_linear_with_log, param_cols_with_log = compute_log_transformed_features(data, self.param_cols)
-        dfs = split_data_set(data_linear_with_log, param_cols_with_log + ['macs'], self.SEED)
+        data = self.load_data(self.config["base_features"], f"{os.getcwd()}/data/MaxPooling2d-energies-parsed.csv")
+        features, data = self.construct_features(data)
+        dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
             "x_preprocessors": [StandardScaler()],
             "y_preprocessor": MinMaxScaler()

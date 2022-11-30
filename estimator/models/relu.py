@@ -1,6 +1,6 @@
+import os
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
-
 from estimator.models._energy_model import EnergyModel
 from experiments.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
@@ -19,8 +19,9 @@ class ReLUEnergyModel(EnergyModel):
         self.param_cols = []
 
     def fit_model(self):
-        data = self.load_data(self.param_cols, "../../data/")
-        dfs = split_data_set(data, ['macs'], self.SEED)
+        data = self.load_data(self.config["base_features"], f"{os.getcwd()}/data/relu-energies-parsed.csv")
+        features, data = self.construct_features(data)
+        dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
             "x_preprocessors": None,
             "y_preprocessor": MinMaxScaler()

@@ -11,7 +11,7 @@ from dataclasses import dataclass
 
 class EnergyChannel(abc.ABC):
     # TODO: only load model once per session
-
+    features_config = None
     @classmethod
     def get_path(cls, version, base_dir, path_type):
         """
@@ -46,7 +46,7 @@ class EnergyChannel(abc.ABC):
         :return: the model
         """
         print(f"Loading model for {cls.__name__}...")
-        models_dir = os.path.join(os.path.dirname(__file__), "serialized_energy_models/")
+        models_dir = os.path.join(os.path.dirname(__file__), "serialized_models/energy_models/")
         model_path = cls.get_path(model_version, models_dir, 'model')
         if model_path == '':
             model = None
@@ -78,7 +78,7 @@ class EnergyChannel(abc.ABC):
         :return: the postprocessor
         """
         print(f"Loading postprocessor for {cls.__name__}...")
-        postprocessors_dir = os.path.join(os.path.dirname(__file__), "target_postprocessors/")
+        postprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/postprocessors/")
         postprocessor_path = cls.get_path(model_version, postprocessors_dir, 'postprocessor')
         if postprocessor_path == '':
             postprocessor = FunctionTransformer(lambda x: x)
@@ -108,8 +108,7 @@ class EnergyChannel(abc.ABC):
         :return: a list of feature values
         """
         # TODO: consider making features a dictionary
-        features = []
-        # TODO: resolve property warnings
+        features = {}
         if len(self.features_config["base_features"]) != 0:
             features += [getattr(self, feature_name) for feature_name in self.features_config["base_features"]]
             if self.features_config["enable_log_features"]:

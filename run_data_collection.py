@@ -53,7 +53,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 activation_types=config['meta']['activation_types'],
-                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
+                output_path=os.path.dirname(__file__) + "/data/" + config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling']
@@ -66,7 +66,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 architectures=config['meta']['architectures'],
-                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
+                output_path=os.path.dirname(__file__) + "/data/" + config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling'],
@@ -80,7 +80,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 configs_from_architectures=config['meta']['configs_from_architectures'],
-                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
+                output_path=os.path.dirname(__file__) + "/data/" + config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling'],

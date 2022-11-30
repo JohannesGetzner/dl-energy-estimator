@@ -1,6 +1,6 @@
+import os
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler
-
 from estimator.models._energy_model import EnergyModel
 from experiments.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
@@ -10,17 +10,19 @@ class LinearEnergyModel(EnergyModel):
 
     def __init__(self,
                  save_to_path_models,
-                 save_to_path_transforms
+                 save_to_path_transforms,
+                 config
                  ):
         super(LinearEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
+            config
         )
-        self.param_cols = []
 
     def fit_model(self):
-        data = self.load_data(self.param_cols, "../../data/")
-        dfs = split_data_set(data, ['macs'], self.SEED)
+        data = self.load_data(self.config["base_features"], f"{os.getcwd()}/data/linear-energies-parsed.csv")
+        features, data = self.construct_features(data)
+        dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
             "x_preprocessors": None,
             "y_preprocessor": MinMaxScaler()
@@ -31,3 +33,4 @@ class LinearEnergyModel(EnergyModel):
                                               plot_results=False)
         y_hat, test_score, test_mse = test_model(model, dfs["x_test"], dfs["y_test"], plot_results=True)
         self.model = model
+        self.transformers_dict = transformers_dict

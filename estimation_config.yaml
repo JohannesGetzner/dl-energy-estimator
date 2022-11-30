@@ -5,6 +5,7 @@ estimation_to_compute:
   vgg11: 16
   vgg13: 64
   vgg16: 256
+
 model_configurations:
   conv2d:
     features_config:
@@ -20,14 +21,16 @@ model_configurations:
     model_version: ''
   linear:
     features_config:
-      base_features: [ 'batch_size','input_size','output_size' ]
-      enable_log_features: True
+      # 'batch_size','input_size','output_size'
+      base_features: [ ]
+      enable_log_features: False
       enable_macs_feature: True
     model_version: ''
   relu:
     features_config:
-      base_features: ['batch_size', 'input_size']
-      enable_log_features: True
+      # 'batch_size', 'input_size'
+      base_features: [ ]
+      enable_log_features: False
       enable_macs_feature: True
     model_version: ''
   sigmoid:
