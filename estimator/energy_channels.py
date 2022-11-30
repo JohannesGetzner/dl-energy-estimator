@@ -46,7 +46,7 @@ class EnergyChannel(abc.ABC):
         :return: the model
         """
         print(f"Loading model for {cls.__name__}...")
-        models_dir = os.path.join(os.path.dirname(__file__), "energy_models/")
+        models_dir = os.path.join(os.path.dirname(__file__), "serialized_energy_models/")
         model_path = cls.get_path(model_version, models_dir, 'model')
         if model_path == '':
             model = None
