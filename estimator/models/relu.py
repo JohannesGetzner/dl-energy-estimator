@@ -10,13 +10,14 @@ class ReLUEnergyModel(EnergyModel):
 
     def __init__(self,
                  save_to_path_models,
-                 save_to_path_transforms
+                 save_to_path_transforms,
+                 config
                  ):
         super(ReLUEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
+            config
         )
-        self.param_cols = []
 
     def fit_model(self):
         data = self.load_data(self.config["base_features"], f"{os.getcwd()}/data/relu-energies-parsed.csv")
@@ -30,5 +31,5 @@ class ReLUEnergyModel(EnergyModel):
         model, val_score, val_mse = fit_model(LinearRegression(), dfs["x_train"], dfs["y_train"], dfs["x_val"],
                                               dfs["y_val"],
                                               plot_results=False)
-        y_hat, test_score, test_mse = test_model(model, dfs["x_test"], dfs["y_test"], plot_results=True)
+        y_hat, test_score, test_mse = test_model(model, dfs["x_test"], dfs["y_test"], plot_results=False)
         self.model = model
