@@ -59,6 +59,7 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True) -> pd.D
     :param aggregate: whether to compute the mean-energy of configurations that are identical
     :return: the preprocessed pd.DataFrame
     """
+    # TODO: implemented check by slurm-output parsing here
     if (df["cpu_energy"] < 0).any():
         previous_shape = df.shape
         df = df.loc[(df["cpu_energy"] > 0) & (df['gpu_energy'] > 0)]
@@ -76,6 +77,7 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True) -> pd.D
 
 
 def parse_slurm_output_for_errors(path='') -> []:
+    # TODO: this function needs to be adjusted to fit the new slurm logs
     """
     checks the slum cluster log for codecarbon errors and returns configurations that which caused the errors
     :param path: the path to the slurm output file
