@@ -1,9 +1,9 @@
 ---
 test_data_path: ''
 estimation_to_compute:
-  alexnet: 5
-  vgg11: 16
-  vgg13: 64
+  #alexnet: 5
+  #vgg11: 16
+  #vgg13: 64
   vgg16: 256
 
 model_configurations:

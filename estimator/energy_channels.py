@@ -1,6 +1,8 @@
 import abc
 import math
 import os
+
+import pandas as pd
 import torch
 import numpy as np
 from joblib import load
@@ -11,7 +13,6 @@ from dataclasses import dataclass
 
 class EnergyChannel(abc.ABC):
     # TODO: only load model once per session
-    features_config = None
     @classmethod
     def get_path(cls, version, base_dir, path_type):
         """
@@ -102,20 +103,23 @@ class EnergyChannel(abc.ABC):
         """
         pass
 
-    def construct_features(self):
+    def construct_features(self, features_config):
         """
         given the channel, and the configuration returns the features for the model without preprocessing
         :return: a list of feature values
         """
-        # TODO: consider making features a dictionary
         features = {}
-        if len(self.features_config["base_features"]) != 0:
-            features += [getattr(self, feature_name) for feature_name in self.features_config["base_features"]]
-            if self.features_config["enable_log_features"]:
-                features += [np.log1p(feature) for feature in features]
-        if self.features_config["enable_macs_feature"]:
-            features += [self.compute_macs()]
-        return features
+        if len(features_config["base_features"]) != 0:
+            features.update(
+                {feature_name: getattr(self, feature_name) for feature_name in features_config["base_features"]}
+            )
+            if features_config["enable_log_features"]:
+                features.update(
+                    {f"log_{feature_name}": np.log1p(feature) for feature_name, feature in features.items()}
+                )
+        if features_config["enable_macs_feature"]:
+            features.update({"macs": self.compute_macs()})
+        return pd.DataFrame(features, index=[0])
 
 
 @dataclass
@@ -157,7 +161,7 @@ class LinearEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self) -> float:
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -201,7 +205,7 @@ class Conv2dEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -237,7 +241,7 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -268,7 +272,7 @@ class ReLUEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -292,7 +296,7 @@ class TanhEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -316,7 +320,7 @@ class SigmoidEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
@@ -340,7 +344,7 @@ class SoftMaxEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features()
+        features = self.construct_features(self.features_config)
         preprocessed_features = preprocessor.transform(
             [features]
         )
