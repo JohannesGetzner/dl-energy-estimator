@@ -82,10 +82,10 @@ def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_trai
     :return: the fitted model, the validation R²-Score and MSE
     """
     r2_scores = cross_val_score(
-        model, x_train, y_train.ravel(), cv=2, n_jobs=-1, scoring="r2"
+        model, x_train, y_train.ravel(), cv=10, n_jobs=-1, scoring="r2"
     )
     mses = cross_val_score(
-        model, x_train, y_train.ravel(), cv=2, n_jobs=-1, scoring="neg_mean_squared_error"
+        model, x_train, y_train.ravel(), cv=10, n_jobs=-1, scoring="neg_mean_squared_error"
     )
     model = model.fit(x_train, y_train.ravel())
     val_score = model.score(x_val, y_val.ravel())
