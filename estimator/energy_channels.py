@@ -107,7 +107,7 @@ class EnergyChannel(abc.ABC):
         given the channel, and the configuration returns the features for the model without preprocessing
         :return: a list of feature values
         """
-        # TODO: consider making feautres a dictionary
+        # TODO: consider making features a dictionary
         features = []
         # TODO: resolve property warnings
         if len(self.features_config["base_features"]) != 0:
@@ -250,15 +250,42 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
 
 
 @dataclass
-class ActivationsEnergyChannel(EnergyChannel):
-    """
-    the channel implementation of EnergyChannel for the Activation functions
-    """
-    model_version: str
-    features_config: {}
+class ReLUEnergyChannel(EnergyChannel):
     batch_size: int
     input_size: int
-    activation_type: str
+    model_version: str
+    features_config: {}
+
+    def compute_macs(self):
+        macs, params = get_model_complexity_info(
+            torch.nn.ReLU(),
+            (self.input_size,),
+            as_strings=False,
+            print_per_layer_stat=False
+        )
+        macs *= self.batch_size
+        return macs
+
+    def compute_energy_estimate(self):
+        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
+        features = self.construct_features()
+        preprocessed_features = preprocessor.transform(
+            [features]
+        )
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        return (
+            postprocessor.inverse_transform([energy_estimate])[0]
+        )
+
+
+@dataclass
+class TanhEnergyChannel(EnergyChannel):
+    batch_size: int
+    input_size: int
+    model_version: str
+    features_config: {}
 
     def compute_macs(self):
         return 0
@@ -266,14 +293,55 @@ class ActivationsEnergyChannel(EnergyChannel):
     def compute_energy_estimate(self):
         preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
         postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = [
-            self.input_size,
-            self.batch_size,
-            1 if self.activation_type.lower() == 'relu' else 0,
-            1 if self.activation_type.lower() == 'tanh' else 0,
-            1 if self.activation_type.lower() == 'sigmoid' else 0,
-            1 if self.activation_type.lower() == 'softmax' else 0
-        ]
+        features = self.construct_features()
+        preprocessed_features = preprocessor.transform(
+            [features]
+        )
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        return (
+            postprocessor.inverse_transform([energy_estimate])[0]
+        )
+
+
+@dataclass
+class SigmoidEnergyChannel(EnergyChannel):
+    batch_size: int
+    input_size: int
+    model_version: str
+    features_config: {}
+
+    def compute_macs(self):
+        return 0
+
+    def compute_energy_estimate(self):
+        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
+        features = self.construct_features()
+        preprocessed_features = preprocessor.transform(
+            [features]
+        )
+        model = self.load_model(model_version=self.model_version)
+        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        return (
+            postprocessor.inverse_transform([energy_estimate])[0]
+        )
+
+
+@dataclass
+class SoftMaxEnergyChannel(EnergyChannel):
+    batch_size: int
+    input_size: int
+    model_version: str
+    features_config: {}
+
+    def compute_macs(self):
+        return 0
+
+    def compute_energy_estimate(self):
+        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
+        features = self.construct_features()
         preprocessed_features = preprocessor.transform(
             [features]
         )

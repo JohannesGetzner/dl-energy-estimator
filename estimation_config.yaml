@@ -24,10 +24,28 @@ model_configurations:
       enable_log_features: True
       enable_macs_feature: True
     model_version: ''
-  activations:
+  relu:
     features_config:
       base_features: ['batch_size', 'input_size']
       enable_log_features: True
       enable_macs_feature: True
+    model_version: ''
+  sigmoid:
+    features_config:
+      base_features: [ 'batch_size', 'input_size' ]
+      enable_log_features: True
+      enable_macs_feature: False
+    model_version: ''
+  softmax:
+    features_config:
+      base_features: [ 'batch_size', 'input_size' ]
+      enable_log_features: True
+      enable_macs_feature: False
+    model_version: ''
+  tanh:
+    features_config:
+      base_features: [ 'batch_size', 'input_size' ]
+      enable_log_features: True
+      enable_macs_feature: False
     model_version: ''
 

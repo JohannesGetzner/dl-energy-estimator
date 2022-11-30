@@ -9,7 +9,10 @@ from .energy_channels import (
     LinearEnergyChannel,
     Conv2dEnergyChannel,
     MaxPooling2dEnergyChannel,
-    ActivationsEnergyChannel,
+    ReLUEnergyChannel,
+    SigmoidEnergyChannel,
+    TanhEnergyChannel,
+    SoftMaxEnergyChannel,
     EnergyChannel
 )
 
@@ -87,65 +90,61 @@ def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_c
 
 @_parse_torch_module.register
 def _(module_to_parse: nn.ReLU, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> ActivationsEnergyChannel:
+      model_version, batch_size) -> ReLUEnergyChannel:
     """
-    hook for the which parses a nn.ReLU to the ActivationsEnergyChannel
+    hook for the which parses a nn.ReLU to the ReLUEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
-    return ActivationsEnergyChannel(
+    return ReLUEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
         features_config=features_config,
         input_size=math.prod(sample_input_dims),
-        activation_type='relu'
     )
 
 
 @_parse_torch_module.register
 def _(module_to_parse: nn.Sigmoid, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> ActivationsEnergyChannel:
+      model_version, batch_size) -> SigmoidEnergyChannel:
     """
-    hook for the which parses a nn.Sigmoid to the ActivationsEnergyChannel
+    hook for the which parses a nn.Sigmoid to the SigmoidEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
-    return ActivationsEnergyChannel(
+    return SigmoidEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
         features_config=features_config,
         input_size=math.prod(sample_input_dims),
-        activation_type='sigmoid'
     )
 
 
 @_parse_torch_module.register
 def _(module_to_parse: nn.Tanh, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> ActivationsEnergyChannel:
+      model_version, batch_size) -> TanhEnergyChannel:
     """
-    hook for the which parses a nn.Tanh to the ActivationsEnergyChannel
+    hook for the which parses a nn.Tanh to the TanHEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
-    return ActivationsEnergyChannel(
+    return TanhEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
         features_config=features_config,
         input_size=math.prod(sample_input_dims),
-        activation_type='tanh'
     )
 
 
 @_parse_torch_module.register
 def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> ActivationsEnergyChannel:
+      model_version, batch_size) -> SoftMaxEnergyChannel:
     """
-    hook for the which parses a nn.Softmax to the ActivationsEnergyChannel
+    hook for the which parses a nn.Softmax to the SoftMaxEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
-    return ActivationsEnergyChannel(
+    return SoftMaxEnergyChannel(
         batch_size=batch_size,
         model_version=model_version,
         features_config=features_config,
         input_size=math.prod(sample_input_dims),
-        activation_type='softmax'
     )
 
 
@@ -160,10 +159,7 @@ def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [Ene
     modules = traverse_architecture_and_return_module_configs(architecture, by_type=False)
     channels = []
     for m, input_shape, module_idx in modules:
-        if str(type(m).__name__).lower() in ['sigmoid', 'relu', 'softmax', 'tanh']:
-            features_config = config['activations']['features_config']
-            model_version = config['activations']['model_version']
-        elif str(type(m).__name__).lower() in config.keys():
+        if str(type(m).__name__).lower() in config.keys():
             features_config = config[str(type(m).__name__).lower()]['features_config']
             model_version = config[str(type(m).__name__).lower()]['model_version']
         else:
