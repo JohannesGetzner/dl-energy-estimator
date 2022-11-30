@@ -1,5 +1,4 @@
-from warnings import warn
-
+import os
 import yaml
 from data_collectors._data_collector import DataCollector
 from data_collectors import Conv2dDataCollector
@@ -54,7 +53,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 activation_types=config['meta']['activation_types'],
-                output_path=config['meta']['output_path'],
+                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling']
@@ -67,7 +66,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 architectures=config['meta']['architectures'],
-                output_path=config['meta']['output_path'],
+                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling'],
@@ -81,7 +80,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                                       param, value in
                                       config['module_params'].items()},
                 configs_from_architectures=config['meta']['configs_from_architectures'],
-                output_path=config['meta']['output_path'],
+                output_path=os.path.dirname(__file__)+"/data/"+config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],
                 random_sampling=config['meta']['random_sampling'],
@@ -101,6 +100,6 @@ def run_data_collection(collectors_to_run) -> None:
 
 
 if __name__ == '__main__':
-    configuration = load_configuration(path='data_collection_config.yaml')
+    configuration = load_configuration(path=f"{os.path.dirname(__file__)}/data_collection_config.yaml")
     collectors = load_data_collectors(configuration)
     run_data_collection(collectors)
