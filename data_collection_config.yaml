@@ -16,7 +16,7 @@ module_configurations:
       sampling_cutoff: 10
       num_repeat_config: 3
       architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-      output_path: "./data/architectures-energies.csv"
+      output_file_name: "architectures-energies.csv"
       include_module_wise_measurements: True
     module_params:
       batch_size: [ 1,257,1 ]
@@ -37,7 +37,7 @@ module_configurations:
       # PyTorch's architectures to extract specific configurations from
       configs_from_architectures: [ ]
       # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
-      output_path: "./data/conv2d-energies.csv"
+      output_file_name: "conv2d-energies.csv"
     module_params:
       # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
       batch_size: [ 1,256,1 ]
@@ -56,7 +56,7 @@ module_configurations:
       sampling_cutoff: 500
       num_repeat_config: 3
       configs_from_architectures: [ ]
-      output_path: "./data/maxpooling2d-energies.csv"
+      output_file_name: "maxpooling2d-energies.csv"
     module_params:
       batch_size: [ 1,256,1 ]
       image_size: [ 4,225,1 ]
@@ -73,7 +73,7 @@ module_configurations:
       sampling_cutoff: 500
       num_repeat_config: 3
       configs_from_architectures: [ ]
-      output_path: "./data/linear-energies.csv"
+      output_file_name: "linear-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
       input_size: [ 1,5001,1 ]
@@ -88,7 +88,7 @@ module_configurations:
       sampling_cutoff: 500
       num_repeat_config: 3
       activation_types: [ 'relu','tanh','sigmoid','softmax' ]
-      output_path: "./data/activations-energies.csv"
+      output_file_name: "activations-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
       input_size: [ 50000,5000000,1 ]
