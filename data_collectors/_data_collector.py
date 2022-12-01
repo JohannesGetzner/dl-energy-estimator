@@ -12,6 +12,7 @@ from warnings import warn
 from codecarbon import EmissionsTracker
 from ptflops import get_model_complexity_info
 from tqdm import tqdm
+import time
 
 
 class DataCollector(abc.ABC):
@@ -138,6 +139,8 @@ class DataCollector(abc.ABC):
         print("Total number of iterations: ", len(configs) * self.num_repeat_config)
         compute_time_in_hours = round(len(configs) * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
+        # sleep such that prints don't get messed up with tqdm progress bars
+        time.sleep(0.1)
 
     def run_data_collection_multiple_configs(self, configs, modules) -> None:
         """
@@ -152,7 +155,7 @@ class DataCollector(abc.ABC):
             for rep_no in range(1, self.num_repeat_config + 1):
                 data = self.generate_data(config)
                 # try:
-                self.run_forward_passes(config, module, data, rep_no, self.output_path)
+                self.run_forward_passes(config, module, data, rep_no)
                 # except:
                 #    warn(f"An error occurred while processing this config [{config}]\n")
 
@@ -167,16 +170,15 @@ class DataCollector(abc.ABC):
         module.eval()
         for rep_no in range(1, self.num_repeat_config + 1):
             # try:
-            self.run_forward_passes(config, module, data, rep_no, self.output_path)
+            self.run_forward_passes(config, module, data, rep_no)
             # except:
             #    warn(f"An error occurred while processing this config [{config}]\n")
 
-    def run_forward_passes(self, config, module, data, rep_no, output_path) -> None:
+    def run_forward_passes(self, config, module, data, rep_no) -> None:
         """
         computes the forward-passes through the module and records the energy consumption
         :param rep_no: current number of the config repetition
         :param config: the current module config as dict
-        :param output_path: the path to the file output location
         :param module: the current PyTorch module instance
         :param data: the data for the forward pass
         """

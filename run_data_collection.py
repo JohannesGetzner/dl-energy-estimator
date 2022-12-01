@@ -1,17 +1,16 @@
 import os
 import yaml
 from data_collectors._data_collector import DataCollector
-from data_collectors import Conv2dDataCollector
-from data_collectors.activations import ActivationsDataCollector
-from data_collectors.architectures import ArchitecturesDataCollector
-from data_collectors.linear import LinearDataCollector
-from data_collectors.maxpooling2d import MaxPooling2dDataCollector
+from data_collectors import *
 
 data_collectors = {
     "conv2d": Conv2dDataCollector,
     "linear": LinearDataCollector,
     "maxpooling2d": MaxPooling2dDataCollector,
-    "activations": ActivationsDataCollector,
+    "relu": ReLUDataCollector,
+    "sigmoid": SigmoidDataCollector,
+    "softmax": SoftmaxDataCollector,
+    "tanh": TanhDataCollector,
     "architectures": ArchitecturesDataCollector
 }
 
@@ -45,20 +44,7 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
         print(f"Loading [{module_name}] data-collector")
         if not config['meta']['random_sampling']:
             print("Attention: grid-search enabled. Computing all possible (valid) parameter combinations.")
-        if module_name == 'activations':
-            collector = ActivationsDataCollector(
-                sampling_timeout=sampling_timeout,
-                seed=seed,
-                module_param_configs={param: range(*value) if config['meta']['random_sampling'] else value for
-                                      param, value in
-                                      config['module_params'].items()},
-                activation_types=config['meta']['activation_types'],
-                output_path=os.path.dirname(__file__) + "/data/" + config['meta']['output_file_name'],
-                sampling_cutoff=config['meta']['sampling_cutoff'],
-                num_repeat_config=config['meta']['num_repeat_config'],
-                random_sampling=config['meta']['random_sampling']
-            )
-        elif module_name == 'architectures':
+        if module_name == 'architectures':
             collector = ArchitecturesDataCollector(
                 sampling_timeout=sampling_timeout,
                 seed=seed,
@@ -73,13 +59,16 @@ def load_data_collectors(data_collection_config) -> {str: DataCollector}:
                 include_module_wise_measurements=config['meta']['include_module_wise_measurements']
             )
         else:
+            configs_from_architectures = None
+            if "configs_from_architectures" in config['meta'].keys():
+                configs_from_architectures = config['meta']['configs_from_architectures']
             collector = data_collectors[module_name](
                 sampling_timeout=sampling_timeout,
                 seed=seed,
                 module_param_configs={param: range(*value) if config['meta']['random_sampling'] else value for
                                       param, value in
                                       config['module_params'].items()},
-                configs_from_architectures=config['meta']['configs_from_architectures'],
+                configs_from_architectures=configs_from_architectures,
                 output_path=os.path.dirname(__file__) + "/data/" + config['meta']['output_file_name'],
                 sampling_cutoff=config['meta']['sampling_cutoff'],
                 num_repeat_config=config['meta']['num_repeat_config'],

@@ -5,7 +5,7 @@ sampling_timeout: 30
 seed: 67898955
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
-to_sample: [ "conv2d","linear","maxpooling2d", "architectures", "activations" ]
+to_sample: [ "conv2d","linear","maxpooling2d", "architectures", "relu", "sigmoid", "tanh", "softmax" ]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -79,16 +79,41 @@ module_configurations:
       input_size: [ 1,5001,1 ]
       output_size: [ 1,5001,1 ]
   # ----
-  # Activations Module
+  # Activations
   # ----
-  activations:
+  relu:
     meta:
       random_sampling: True
-      # no. of samples for each type of activation
-      sampling_cutoff: 500
-      num_repeat_config: 3
-      activation_types: [ 'relu','tanh','sigmoid','softmax' ]
-      output_file_name: "activations-energies.csv"
+      sampling_cutoff: 5
+      num_repeat_config: 1
+      output_file_name: "relu-energies.csv"
+    module_params:
+      batch_size: [ 1,513,1 ]
+      input_size: [ 50000,5000000,1 ]
+  sigmoid:
+    meta:
+      random_sampling: True
+      sampling_cutoff: 5
+      num_repeat_config: 1
+      output_file_name: "sigmoid-energies.csv"
+    module_params:
+      batch_size: [ 1,513,1 ]
+      input_size: [ 50000,5000000,1 ]
+  tanh:
+    meta:
+      random_sampling: True
+      sampling_cutoff: 5
+      num_repeat_config: 1
+      output_file_name: "tanh-energies.csv"
+    module_params:
+      batch_size: [ 1,513,1 ]
+      input_size: [ 50000,5000000,1 ]
+  softmax:
+    meta:
+      random_sampling: True
+      sampling_cutoff: 5
+      num_repeat_config: 1
+      output_file_name: "softmax-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
       input_size: [ 50000,5000000,1 ]
