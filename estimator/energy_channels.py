@@ -22,22 +22,21 @@ class EnergyChannel(abc.ABC):
         :param path_type: the type of to load: model, pre- or postprocessor
         :return: the path to the serialized model, pre- or postprocessor to load
         """
-        files_list = [
-            file
-            for file in sorted(os.listdir(base_dir))
-        ]
+        files_list = [file for file in sorted(os.listdir(base_dir)) if cls.__name__.lower() in file.lower()]
         if len(files_list) == 0:
+            print(f"    No {path_type} found.")
             return ''
         else:
             if version:
-                final_path = [path for path in files_list if path.startswith(version)][0]
+                final_path = \
+                    [path for path in files_list if path.startswith(version)][0]
                 if not final_path:
                     raise FileNotFoundError(f"No {path_type} for {cls.__name__} and version {version} has been found.")
             else:
-                print(f"    No {path_type}-version was specified. Loading most recent model")
+                print(f"    No {path_type}-version was specified. Loading most recent model.")
                 final_path = files_list[-1]
         print(f"    Loaded {path_type} --- {final_path} for {cls.__name__}")
-        return final_path
+        return os.path.join(base_dir, final_path)
 
     @classmethod
     def load_model(cls, model_version):
@@ -63,7 +62,7 @@ class EnergyChannel(abc.ABC):
         :return: the preprocessor
         """
         print(f"Loading preprocessors for {cls.__name__}...")
-        preprocessors_dir = os.path.join(os.path.dirname(__file__), "feature_preprocessors/")
+        preprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/preprocessors/")
         preprocessor_path = cls.get_path(model_version, preprocessors_dir, 'preprocessor')
         if preprocessor_path == '':
             preprocessor = FunctionTransformer(lambda x: x)
@@ -103,20 +102,20 @@ class EnergyChannel(abc.ABC):
         """
         pass
 
-    def construct_features(self, features_config):
+    def construct_features(self, base_features, features_config):
         """
         given the channel, and the configuration returns the features for the model without preprocessing
         :return: a list of feature values
         """
         features = {}
-        if len(features_config["base_features"]) != 0:
+        if features_config["enable_base_features"]:
             features.update(
-                {feature_name: getattr(self, feature_name) for feature_name in features_config["base_features"]}
+                {f_name: getattr(self, f_name) for f_name in base_features}
             )
-            if features_config["enable_log_features"]:
-                features.update(
-                    {f"log_{feature_name}": np.log1p(feature) for feature_name, feature in features.items()}
-                )
+        if features_config["enable_log_features"]:
+            features.update(
+                {f"log_{f_name}": np.log1p(getattr(self, f_name)) for f_name in base_features}
+            )
         if features_config["enable_macs_feature"]:
             features.update({"macs": self.compute_macs()})
         return pd.DataFrame(features, index=[0])
@@ -142,8 +141,7 @@ class LinearEnergyChannel(EnergyChannel):
     """
     the channel implementation of EnergyChannel for the Linear module
     """
-    model_version: str
-    features_config: dict
+    config: dict
     batch_size: int
     input_size: int
     output_size: int
@@ -159,14 +157,12 @@ class LinearEnergyChannel(EnergyChannel):
         return macs
 
     def compute_energy_estimate(self) -> float:
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )
@@ -177,8 +173,7 @@ class Conv2dEnergyChannel(EnergyChannel):
     """
     the channel implementation of EnergyChannel for the Conv2d module
     """
-    model_version: str
-    features_config: {}
+    config: dict
     batch_size: int
     in_channels: int
     image_size: int
@@ -203,14 +198,12 @@ class Conv2dEnergyChannel(EnergyChannel):
         return macs
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return postprocessor.inverse_transform([energy_estimate])[0]
 
 
@@ -219,8 +212,7 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
     """
     the channel implementation of EnergyChannel for the MaxPooling2d module
     """
-    model_version: str
-    features_config: {}
+    config: dict
     batch_size: int
     in_channels: int
     image_size: int
@@ -239,14 +231,12 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
         return macs
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )
@@ -256,8 +246,7 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
 class ReLUEnergyChannel(EnergyChannel):
     batch_size: int
     input_size: int
-    model_version: str
-    features_config: {}
+    config: dict
 
     def compute_macs(self):
         macs, params = get_model_complexity_info(
@@ -270,14 +259,12 @@ class ReLUEnergyChannel(EnergyChannel):
         return macs
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )
@@ -287,21 +274,18 @@ class ReLUEnergyChannel(EnergyChannel):
 class TanhEnergyChannel(EnergyChannel):
     batch_size: int
     input_size: int
-    model_version: str
-    features_config: {}
+    config: dict
 
     def compute_macs(self):
         return 0
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )
@@ -311,21 +295,18 @@ class TanhEnergyChannel(EnergyChannel):
 class SigmoidEnergyChannel(EnergyChannel):
     batch_size: int
     input_size: int
-    model_version: str
-    features_config: {}
+    config: {}
 
     def compute_macs(self):
         return 0
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )
@@ -335,21 +316,18 @@ class SigmoidEnergyChannel(EnergyChannel):
 class SoftMaxEnergyChannel(EnergyChannel):
     batch_size: int
     input_size: int
-    model_version: str
-    features_config: {}
+    config: dict
 
     def compute_macs(self):
         return 0
 
     def compute_energy_estimate(self):
-        preprocessor = self.load_feature_preprocessors(model_version=self.model_version)
-        postprocessor = self.load_target_variable_postprocessor(model_version=self.model_version)
-        features = self.construct_features(self.features_config)
-        preprocessed_features = preprocessor.transform(
-            [features]
-        )
-        model = self.load_model(model_version=self.model_version)
-        energy_estimate = model.predict([*preprocessed_features]) if model else 0
+        preprocessor = self.load_feature_preprocessors(model_version=self.config["model_version"])
+        postprocessor = self.load_target_variable_postprocessor(model_version=self.config["model_version"])
+        features = self.construct_features(self.config["base_features"], self.config["features_config"])
+        preprocessed_features = preprocessor.transform(features)
+        model = self.load_model(model_version=self.config["model_version"])
+        energy_estimate = model.predict(preprocessed_features) if model else 0
         return (
             postprocessor.inverse_transform([energy_estimate])[0]
         )

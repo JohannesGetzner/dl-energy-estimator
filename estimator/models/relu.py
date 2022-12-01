@@ -35,3 +35,4 @@ class ReLUEnergyModel(EnergyModel):
                                               plot_results=False)
         y_hat, test_score, test_mse = test_model(model, dfs["x_test"], dfs["y_test"], plot_results=False)
         self.model = model
+        self.transformers_dict = transformers_dict

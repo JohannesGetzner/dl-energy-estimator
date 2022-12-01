@@ -1,5 +1,7 @@
 import abc
 import os
+from warnings import warn
+
 import pandas as pd
 from datetime import datetime
 from joblib import dump
@@ -30,16 +32,22 @@ class EnergyModel():
         pass
 
     def construct_features(self, data):
-        features = self.config["base_features"]
-        if self.config["enable_log_features"]:
+        f_config = self.config["features_config"]
+        features = []
+        if f_config["enable_base_features"]:
+            features += self.config["base_features"]
+        if f_config["enable_log_features"]:
             data_with_log, param_cols_with_log = compute_log_transformed_features(
                 data,
                 self.config["base_features"]
             )
             data = data_with_log
             features = param_cols_with_log
-        if self.config["enable_macs_feature"]:
+        if f_config["enable_macs_feature"]:
             features += ['macs']
+        if len(features) == 0:
+            warn("No feature set specified!")
+        print(features)
         return features, data
 
     def load_data(self, param_cols, path):
@@ -59,7 +67,7 @@ class EnergyModel():
             )
         )
 
-        if "x_preprocessors" in self.transformers_dict:
+        if self.transformers_dict["x_preprocessors"]:
             for idx, transformer in enumerate(self.transformers_dict["x_preprocessors"]):
                 dump(
                     transformer,
@@ -69,7 +77,7 @@ class EnergyModel():
                     ),
                 )
 
-        if "y_preprocessor" in self.transformers_dict:
+        if self.transformers_dict["y_preprocessor"]:
             preprocessor = self.transformers_dict["y_preprocessor"]
             dump(
                 preprocessor,

@@ -18,7 +18,7 @@ from .energy_channels import (
 
 
 @singledispatch
-def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, features_config, model_version,
+def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, config,
                         batch_size) -> EnergyChannel:
     """
     singledispatch function to parse a PyTorch Module into a custom channel class
@@ -35,31 +35,28 @@ def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, features_
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.Linear, sample_input_dims, features_config, model_version,
+def _(module_to_parse: nn.Linear, sample_input_dims, config,
       batch_size) -> LinearEnergyChannel:
     """
     hook for the which parses a nn.Linear to the LinearEnergyChannel
     """
     return LinearEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         input_size=module_to_parse.in_features,
         output_size=module_to_parse.out_features,
     )
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> Conv2dEnergyChannel:
+def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, config: {}, batch_size) -> Conv2dEnergyChannel:
     """
     hook for the which parses a nn.Conv2d to the Conv2dEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return Conv2dEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         in_channels=module_to_parse.in_channels,
         out_channels=module_to_parse.out_channels,
         padding=module_to_parse.padding[0],
@@ -70,16 +67,15 @@ def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, features_conf
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> MaxPooling2dEnergyChannel:
+def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, config: {},
+      batch_size) -> MaxPooling2dEnergyChannel:
     """
     hook for the which parses a nn.MaxPool2d to the MaxPooling2dEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return MaxPooling2dEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         in_channels=sample_input_dims[1],
         stride=module_to_parse.stride,
         kernel_size=module_to_parse.kernel_size,
@@ -89,61 +85,56 @@ def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, features_c
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.ReLU, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> ReLUEnergyChannel:
+def _(module_to_parse: nn.ReLU, sample_input_dims: torch.Tensor, config: {}, batch_size) -> ReLUEnergyChannel:
     """
     hook for the which parses a nn.ReLU to the ReLUEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return ReLUEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         input_size=math.prod(sample_input_dims),
     )
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.Sigmoid, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> SigmoidEnergyChannel:
+def _(module_to_parse: nn.Sigmoid, sample_input_dims: torch.Tensor, config: {},
+      batch_size) -> SigmoidEnergyChannel:
     """
     hook for the which parses a nn.Sigmoid to the SigmoidEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return SigmoidEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         input_size=math.prod(sample_input_dims),
     )
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.Tanh, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> TanhEnergyChannel:
+def _(module_to_parse: nn.Tanh, sample_input_dims: torch.Tensor, config: {},
+      batch_size) -> TanhEnergyChannel:
     """
     hook for the which parses a nn.Tanh to the TanHEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return TanhEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         input_size=math.prod(sample_input_dims),
     )
 
 
 @_parse_torch_module.register
-def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, features_config: {},
-      model_version, batch_size) -> SoftMaxEnergyChannel:
+def _(module_to_parse: nn.Softmax, sample_input_dims: torch.Tensor, config: {},
+      batch_size) -> SoftMaxEnergyChannel:
     """
     hook for the which parses a nn.Softmax to the SoftMaxEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
     return SoftMaxEnergyChannel(
         batch_size=batch_size,
-        model_version=model_version,
-        features_config=features_config,
+        config=config,
         input_size=math.prod(sample_input_dims),
     )
 
@@ -160,11 +151,9 @@ def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [Ene
     channels = []
     for m, input_shape, module_idx in modules:
         if str(type(m).__name__).lower() in config.keys():
-            features_config = config[str(type(m).__name__).lower()]['features_config']
-            model_version = config[str(type(m).__name__).lower()]['model_version']
+            m_config = config[str(type(m).__name__).lower()]
         else:
-            features_config = {}
-            model_version = ''
-        channel = _parse_torch_module(m, input_shape, features_config, model_version, batch_size)
+            m_config = {}
+        channel = _parse_torch_module(m, input_shape, m_config, batch_size)
         channels.append(channel)
     return channels

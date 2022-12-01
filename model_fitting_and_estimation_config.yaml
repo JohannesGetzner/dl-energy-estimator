@@ -7,9 +7,10 @@ estimation_to_compute:
   vgg16: 256
 # from current working directory
 data_directory: '/data'
+
+
 model_configurations:
   # feature configurations have to match the specified model version!
-
   # ----
   # Conv2d Module
   # ----
@@ -17,8 +18,9 @@ model_configurations:
     # chooses most recent version if unspecified
     model_version: ''
     data_file_name: 'conv2d-energies-parsed.csv'
+    base_features: [ 'batch_size', 'image_size', 'kernel_size', 'in_channels', 'out_channels', 'stride', 'padding' ]
     features_config:
-      base_features: [ 'batch_size', 'image_size', 'kernel_size', 'in_channels', 'out_channels', 'stride', 'padding' ]
+      enable_base_features: True
       enable_log_features: True
       enable_macs_feature: True
   # ----
@@ -27,8 +29,9 @@ model_configurations:
   maxpool2d:
     model_version: ''
     data_file_name: 'maxpooling2d-energies-parsed.csv'
+    base_features: [ 'batch_size','image_size','kernel_size','in_channels','stride','padding' ]
     features_config:
-      base_features: [ 'batch_size','image_size','kernel_size','in_channels','stride','padding' ]
+      enable_base_features: True
       enable_log_features: True
       enable_macs_feature: True
   # ----
@@ -37,9 +40,9 @@ model_configurations:
   linear:
     model_version: ''
     data_file_name: 'linear-energies-parsed.csv'
+    base_features: [ 'batch_size','input_size','output_size' ]
     features_config:
-      # 'batch_size','input_size','output_size'
-      base_features: [ ]
+      enable_base_features: False
       enable_log_features: False
       enable_macs_feature: True
   # ----
@@ -48,30 +51,33 @@ model_configurations:
   relu:
     model_version: ''
     data_file_name: 'relu-energies-parsed.csv'
+    base_features: [ 'batch_size', 'input_size' ]
     features_config:
-      # 'batch_size', 'input_size'
-      base_features: [ ]
+      enable_base_features: False
       enable_log_features: False
       enable_macs_feature: True
   sigmoid:
     model_version: ''
     data_file_name: 'sigmoid-energies-parsed.csv'
+    base_features: [ 'batch_size', 'input_size' ]
     features_config:
-      base_features: [ 'batch_size', 'input_size' ]
+      enable_base_features: True
       enable_log_features: True
       enable_macs_feature: False
   softmax:
     model_version: ''
     data_file_name: 'softmax-energies-parsed.csv'
+    base_features: [ 'batch_size', 'input_size' ]
     features_config:
-      base_features: [ 'batch_size', 'input_size' ]
+      enable_base_features: True
       enable_log_features: True
       enable_macs_feature: False
   tanh:
     model_version: ''
     data_file_name: 'tanh-energies-parsed.csv'
+    base_features: [ 'batch_size', 'input_size' ]
     features_config:
-      base_features: [ 'batch_size', 'input_size' ]
+      enable_base_features: True
       enable_log_features: True
       enable_macs_feature: False
 

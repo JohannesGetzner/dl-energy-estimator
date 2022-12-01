@@ -45,7 +45,7 @@ def apply_data_transforms(dfs: pd.DataFrame, transformers_dict: {}) -> (pd.DataF
             dfs['x_train'] = p.fit_transform(dfs['x_train'])
             dfs['x_val'] = p.transform(dfs['x_val'])
             dfs['x_test'] = p.transform(dfs['x_test'])
-    if transformers_dict["y_preprocessor"] is not None:
+    if transformers_dict["y_preprocessor"]:
         dfs['y_train'] = transformers_dict["y_preprocessor"].fit_transform(dfs['y_train'].to_numpy().reshape(-1, 1))
         dfs['y_val'] = transformers_dict["y_preprocessor"].transform(dfs['y_val'].to_numpy().reshape(-1, 1))
         dfs['y_test'] = transformers_dict["y_preprocessor"].transform(dfs['y_test'].to_numpy().reshape(-1, 1))
@@ -64,7 +64,6 @@ def compute_log_transformed_features(df: pd.DataFrame, features_to_transform: []
     for col in features_to_transform:
         data_w_log_features[f"log_{col}"] = np.log1p(data_w_log_features[col])
         new_cols.append(f"log_{col}")
-    print("New Columns: ", features_to_transform + new_cols)
     return data_w_log_features, features_to_transform + new_cols
 
 
@@ -91,7 +90,6 @@ def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_trai
     val_score = model.score(x_val, y_val.ravel())
     val_mse = mean_squared_error(y_val.ravel(), model.predict(x_val))
     if verbose:
-        print("-" * 20)
         print("Average R2 Cross-Validation Score: {:.3f} (± {:.3f})".format(np.average(r2_scores), np.std(r2_scores)))
         print("Average MSE Cross-Validation: {:.3e} (± {:.3e})".format(np.average(mses), np.std(mses)))
         print("Validation R2 Score: {:.3f}".format(val_score))

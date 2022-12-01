@@ -7,6 +7,9 @@ model_classes = {
     "linear": LinearEnergyModel,
     "maxpool2d": MaxPooling2dEnergyModel,
     "relu": ReLUEnergyModel,
+    "sigmoid": ReLUEnergyModel,
+    "softmax": ReLUEnergyModel,
+    "tanh": ReLUEnergyModel,
 }
 
 
@@ -20,12 +23,13 @@ def fit_models():
         model = model_classes[model_name](
             save_to_path_models="estimator/serialized_models/energy_models",
             save_to_path_transforms="./estimator/serialized_models/",
-            config=model_config["features_config"],
+            config=model_config,
             data_path=f"{os.getcwd()}{config['data_directory']}/{model_config['data_file_name']}"
         )
+        print(f"\n--------------------\nFitting [{model_name}] model")
         model.fit_model()
-        model.save_model_and_transformers(model_name)
-        break
+        model.save_model_and_transformers(model_name+"EnergyChannel")
+        print(f"--------------------")
 
 
 if __name__ == '__main__':

@@ -1,11 +1,11 @@
 ---
 # data collection configuration
-sampling_timeout: 30
+sampling_timeout: 1
 # specify a seed for reproducible results; leave empty if no seed should be used
 seed: 67898955
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
-to_sample: [ "conv2d","linear","maxpooling2d", "architectures", "relu", "sigmoid", "tanh", "softmax" ]
+to_sample: [ "conv2d","linear","maxpooling2d", "relu", "sigmoid", "tanh", "softmax" ]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -13,8 +13,8 @@ module_configurations:
   architectures:
     meta:
       random_sampling: True
-      sampling_cutoff: 10
-      num_repeat_config: 3
+      sampling_cutoff: 5
+      num_repeat_config: 1
       architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
       output_file_name: "architectures-energies.csv"
       include_module_wise_measurements: True
@@ -31,20 +31,20 @@ module_configurations:
       # discrete values to avoid a combinatorial explosion.
       random_sampling: True
       # number of samples if random_sampling True
-      sampling_cutoff: 500
+      sampling_cutoff: 50
       # number of times a config should be repeated
-      num_repeat_config: 3
+      num_repeat_config: 1
       # PyTorch's architectures to extract specific configurations from
       configs_from_architectures: [ ]
       # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
       output_file_name: "conv2d-energies.csv"
     module_params:
       # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
-      batch_size: [ 1,256,1 ]
-      image_size: [ 4,225,1 ]
+      batch_size: [ 1,25,1 ]
+      image_size: [ 4,22,1 ]
       kernel_size: [ 1,12,1 ]
-      in_channels: [ 1,513,1 ]
-      out_channels: [ 1,513,1 ]
+      in_channels: [ 1,51,1 ]
+      out_channels: [ 1,51,1 ]
       stride: [ 1,6,1 ]
       padding: [ 0,4,1 ]
   # ----
@@ -53,15 +53,15 @@ module_configurations:
   maxpooling2d:
     meta:
       random_sampling: True
-      sampling_cutoff: 500
-      num_repeat_config: 3
+      sampling_cutoff: 50
+      num_repeat_config: 1
       configs_from_architectures: [ ]
       output_file_name: "maxpooling2d-energies.csv"
     module_params:
-      batch_size: [ 1,256,1 ]
-      image_size: [ 4,225,1 ]
+      batch_size: [ 1,25,1 ]
+      image_size: [ 4,22,1 ]
       kernel_size: [ 1,12,1 ]
-      in_channels: [ 1,513,1 ]
+      in_channels: [ 1,53,1 ]
       stride: [ 1,6,1 ]
       padding: [ 0,4,1 ]
   # ----
@@ -70,21 +70,21 @@ module_configurations:
   linear:
     meta:
       random_sampling: True
-      sampling_cutoff: 500
-      num_repeat_config: 3
+      sampling_cutoff: 50
+      num_repeat_config: 1
       configs_from_architectures: [ ]
       output_file_name: "linear-energies.csv"
     module_params:
-      batch_size: [ 1,513,1 ]
-      input_size: [ 1,5001,1 ]
-      output_size: [ 1,5001,1 ]
+      batch_size: [ 1,51,1 ]
+      input_size: [ 1,500,1 ]
+      output_size: [ 1,500,1 ]
   # ----
   # Activations
   # ----
   relu:
     meta:
       random_sampling: True
-      sampling_cutoff: 5
+      sampling_cutoff: 50
       num_repeat_config: 1
       output_file_name: "relu-energies.csv"
     module_params:
@@ -93,7 +93,7 @@ module_configurations:
   sigmoid:
     meta:
       random_sampling: True
-      sampling_cutoff: 5
+      sampling_cutoff: 50
       num_repeat_config: 1
       output_file_name: "sigmoid-energies.csv"
     module_params:
@@ -102,7 +102,7 @@ module_configurations:
   tanh:
     meta:
       random_sampling: True
-      sampling_cutoff: 5
+      sampling_cutoff: 50
       num_repeat_config: 1
       output_file_name: "tanh-energies.csv"
     module_params:
@@ -111,7 +111,7 @@ module_configurations:
   softmax:
     meta:
       random_sampling: True
-      sampling_cutoff: 5
+      sampling_cutoff: 50
       num_repeat_config: 1
       output_file_name: "softmax-energies.csv"
     module_params:
