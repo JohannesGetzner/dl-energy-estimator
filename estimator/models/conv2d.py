@@ -11,16 +11,18 @@ class Conv2dEnergyModel(EnergyModel):
     def __init__(self,
                  save_to_path_models,
                  save_to_path_transforms,
-                 config
+                 config,
+                 data_path
                  ):
         super(Conv2dEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
-            config
+            config,
+            data_path
         )
 
     def fit_model(self):
-        data = self.load_data(self.config["base_features"], f"{os.getcwd()}/data/conv2d-energies-parsed.csv")
+        data = self.load_data(self.config["base_features"], self.data_path)
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {

@@ -25,7 +25,7 @@ def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, features_
     individual implementations for each module below
     :param module_to_parse: the module to be parsed
     :param sample_input_dims: correct data-dimensions as input to the model
-    :param features_config: the features configuration for the give module from 'estimation_config.yaml'
+    :param features_config: the features configuration for the give module from 'model_fitting_and_estimation_config.yaml'
     :param model_version: the version of the model to load
     :param batch_size: the batch_size of the forward pass
     :return: the custom channel class or None if the there is no matching channel implementation
@@ -153,7 +153,7 @@ def parse_architecture(architecture: nn.Module, batch_size: int, config) -> [Ene
     iterates over the modules of a torchvision.models architecture and parses each module to the corresponding channel
     :param architecture: the torchvision.models architecture
     :param batch_size:  the batch_size associated with the forward pass
-    :param config: the configuration of the channels from 'estimation_config.yaml'
+    :param config: the configuration of the channels from 'model_fitting_and_estimation_config.yaml'
     :return: a list of parsed channels
     """
     modules = traverse_architecture_and_return_module_configs(architecture, by_type=False)

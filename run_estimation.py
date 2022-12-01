@@ -5,7 +5,7 @@ from estimator.architecture_parser import parse_architecture
 
 
 def run_estimation():
-    with open('./estimation_config.yaml', "r") as stream:
+    with open('model_fitting_and_estimation_config.yaml', "r") as stream:
         try:
             config = yaml.safe_load(stream)
         except yaml.YAMLError as exc:
@@ -25,7 +25,7 @@ def compute_energy_estimate(architecture: nn.Module, batch_size: int, config):
     iterates over the channels and compute the energy estimate of each one
     :param architecture: the architecture to compute the estimate for
     :param batch_size: the batch_size of the forward pass
-    :param config: the configuration from 'estimation_config.yaml'
+    :param config: the configuration from 'model_fitting_and_estimation_config.yaml'
     :return: the total estimate energy_consumption of the architecture and the channel wise estimates
     """
     channels = parse_architecture(architecture=architecture, batch_size=batch_size, config=config)

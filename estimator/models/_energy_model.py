@@ -14,11 +14,13 @@ class EnergyModel():
             self,
             save_to_path_models,
             save_to_path_transforms,
-            config
+            config,
+            data_path
     ):
         self.save_to_path_models = save_to_path_models
         self.save_to_path_transforms = save_to_path_transforms
         self.config = config
+        self.data_path = data_path
         self.SEED = 1234
         self.model = None
         self.transformers_dict = None
