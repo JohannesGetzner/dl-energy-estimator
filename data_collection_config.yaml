@@ -5,7 +5,7 @@ sampling_timeout: 30
 seed: 123456
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpool2d", "linear", "activations", "architectures"
-to_sample: [ "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures"]
+to_sample: [ "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures" ]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -35,7 +35,7 @@ module_configurations:
       # number of times a config should be repeated
       num_repeat_config: 3
       # PyTorch's architectures to extract specific configurations from
-      configs_from_architectures: [ ]
+      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
       # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
       output_file_name: "conv2d-energies.csv"
     module_params:
@@ -55,7 +55,7 @@ module_configurations:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
-      configs_from_architectures: [ ]
+      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
       output_file_name: "maxpool2d-energies.csv"
     module_params:
       batch_size: [ 1,257,1 ]
@@ -72,7 +72,7 @@ module_configurations:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
-      configs_from_architectures: [ ]
+      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
       output_file_name: "linear-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
