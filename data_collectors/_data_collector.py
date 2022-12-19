@@ -12,7 +12,7 @@ from warnings import warn
 from codecarbon import EmissionsTracker
 from ptflops import get_model_complexity_info
 from tqdm import tqdm
-import time
+from datetime import date
 
 
 class DataCollector(abc.ABC):
@@ -41,8 +41,9 @@ class DataCollector(abc.ABC):
         self.sampling_cutoff = sampling_cutoff
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
-        # TODO: add date to output file
-        self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2', output_path)
+        today = date.today()
+        self.output_path = f"[{today.strftime('%d/%m/%Y')}]-" + re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2',
+                                                                       output_path)
         if seed:
             np.random.seed(seed)
 
@@ -75,8 +76,7 @@ class DataCollector(abc.ABC):
             s = m.stride
             k = m.kernel_size
             p = m.padding
-            # TODO: evaluate formula with regards to the padding parameter
-            flops = math.pow(k, 2) * math.pow(math.floor((data_dims[2] - k + 2 * p) / s + 1), 2) * data_dims[1]
+            flops = math.pow(k, 2) * math.pow(math.floor(((data_dims[2] - k + (2 * p)) / s) + 1), 2) * data_dims[1]
             flops = flops * data_dims[0]
             # max-pooling does not use MACs, but only FLOPs -> must convert
             macs = flops / 2

@@ -227,8 +227,7 @@ class MaxPooling2dEnergyChannel(EnergyChannel):
     def compute_macs(self):
         s = self.stride
         k = self.kernel_size
-        # TODO: evaluate formula with padding
-        flops = math.pow(k, 2) * math.pow(math.floor((self.image_size - k + 2 * self.padding) / s + 1),
+        flops = math.pow(k, 2) * math.pow(math.floor(((self.image_size - k + (2 * self.padding)) / s) + 1),
                                           2) * self.in_channels
         flops = flops * self.batch_size
         macs = flops / 2
