@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 from warnings import warn
+import re
 
 
 def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
@@ -51,16 +52,17 @@ def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
     return df
 
 
-def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose=False) -> pd.DataFrame:
+def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose=False,
+                                         slurm_log_info=None) -> pd.DataFrame:
     """
     this function normalizes the measured energy_values by the number of forward-passes and aggregates repeated configs
+    :param slurm_log_info: a tuple of shape (path_to_file,data_collector_name) e.g. ('./slurm-111.out',conv2d)
     :param verbose: set to true for additional information printed to console
     :param df: the pd.DataFrame containing the data from the parsed codecarbon output
     :param param_cols: the parameter names of the module configuration
     :param aggregate: whether to compute the mean-energy of configurations that are identical
     :return: the preprocessed pd.DataFrame
     """
-    # TODO: implemented check by slurm-output parsing here
     if (df["cpu_energy"] < 0).any():
         previous_shape = df.shape
         df = df.loc[(df["cpu_energy"] > 0) & (df['gpu_energy'] > 0)]
@@ -75,41 +77,38 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose
         if verbose:
             print(
                 f"Shape before aggregation: {previous_shape}, after aggregation: {df.shape} (non numeric columns removed)")
+    if slurm_log_info:
+        invalid_configs = parse_slurm_output_for_errors(slurm_log_info[0])
+        df.drop(index=invalid_configs[slurm_log_info[1]])
     return df
 
 
 def parse_slurm_output_for_errors(path='') -> []:
-    # TODO: this function needs to be adjusted to fit the new slurm logs
     """
-    checks the slum cluster log for codecarbon errors and returns configurations that which caused the errors
-    :param path: the path to the slurm output file
-    :return:the invalid configurations
+    checks the slum cluster log for codecarbon errors and returns configuration indices which caused the errors
+    :param path: the path to the sluarm output file
+    :return:the invalid configurations indices (corresponding to rows in csv)
     """
     file = open(path, 'r')
     lines = file.readlines()
-    invalid_exps = []
-    current_exp = None
-    error_checked = False
+    curr_config_idx = 0
+    curr_config = ""
+    invalid_configs = {}
+    curr_data_collector = ""
     for line in lines:
-        if line.startswith(" ----"):
-            current_exp = line
-            error_checked = False
-        elif 'ERROR' in line and not error_checked:
-            invalid_exps.append(current_exp)
-            error_checked = True
-    parsed_invalid_exps = []
-    for e in invalid_exps:
-        config = e[29:-1]
-        params = config.split(",", 9)
-        parsed_config = dict()
-        for param in params:
-            param_name = param.split(":", 1)[0]
-            param_value = param.split(":", 1)[1]
-            if param_name == 'macs':
-                param_value = param_value[:-2]
-            if param_value.isdigit():
-                param_value = int(param_value)
-            parsed_config[param_name] = param_value
-        parsed_invalid_exps.append(parsed_config)
-    print(f"Discovered {len(parsed_invalid_exps)} invalid experiments.")
-    return parsed_invalid_exps
+        if line.startswith("Starting data-collection for"):
+            curr_data_collector = line.split(" ")[-1][:-4]
+            invalid_configs[curr_data_collector] = []
+        elif line.startswith("current config:"):
+            curr_config = line
+            pattern_match = re.search("([0-9]+)\/[0-9]+", line)
+            curr_config_idx = pattern_match.groups()[0]
+        elif line.startswith("[codecarbon ERROR"):
+            if len(invalid_configs[curr_data_collector]) == 0 or invalid_configs[curr_data_collector][
+                -1] != curr_config_idx:
+                invalid_configs[curr_data_collector].append(curr_config_idx)
+    return invalid_configs
+
+
+if __name__ == '__main__':
+    parse_slurm_output_for_errors('../test-slurm.out')

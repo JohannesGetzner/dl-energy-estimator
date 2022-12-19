@@ -188,7 +188,7 @@ class DataCollector(abc.ABC):
             save_to_file=True,
             output_file=self.output_path,
             log_level='warning',
-            measure_power_secs=15
+            measure_power_secs=3
         )
         tracker.start()
         count = 0
