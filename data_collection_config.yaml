@@ -2,7 +2,7 @@
 # data collection configuration
 sampling_timeout: 30
 # specify a seed for reproducible results; leave empty if no seed should be used
-seed: 67898955
+seed: 123456
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
 to_sample: [ "conv2d","linear","maxpooling2d", "relu", "sigmoid", "tanh", "softmax", "architectures"]
