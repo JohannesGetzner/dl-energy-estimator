@@ -46,7 +46,8 @@ def traverse_architecture_and_return_module_configs(a, by_type=False):
     for module in modules:
         modules_by_type[type(module)] = []
 
-    sample_input = torch.rand((1, 3, 244, 244))
+    # TODO: this input size should not be fixed but adjustable
+    sample_input = torch.rand((1, 3, 224, 224))
     for idx, module in enumerate(modules):
         if isinstance(module, nn.Linear):
             sample_input = torch.flatten(sample_input)
