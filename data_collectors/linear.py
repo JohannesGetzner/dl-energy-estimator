@@ -85,7 +85,7 @@ class LinearDataCollector(DataCollector):
         if self.configs_from_architectures:
             a_configs, a_modules = self.get_linear_configs_from_architectures()
         self.print_data_collection_info(random_configs + a_configs)
-        print("Doing random configs...")
+        print("Doing random configs...\n")
         modules = [self.initialize_module(config) for config in random_configs]
         self.run_data_collection_multiple_configs(random_configs, modules)
 

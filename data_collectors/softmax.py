@@ -51,7 +51,7 @@ class SoftmaxDataCollector(DataCollector):
         starts the data collection
         """
 
-        print("Doing random configs...")
+        print("Doing random configs...\n")
         random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
         self.print_data_collection_info(random_configs)
         modules = [self.initialize_module(config) for config in random_configs]

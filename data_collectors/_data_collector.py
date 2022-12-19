@@ -41,7 +41,7 @@ class DataCollector(abc.ABC):
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
         today = date.today()
-        self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2',output_path)
+        self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2', output_path)
         if seed:
             np.random.seed(seed)
 
@@ -150,12 +150,10 @@ class DataCollector(abc.ABC):
         for config, module in zip(configs, modules):
             module.eval()
             for rep_no in range(1, self.num_repeat_config + 1):
-                print(f"(config_no={config_no}) [{self.config_to_string(config)}] (rep_no={rep_no})")
+                print(
+                    f"{config_no}/{rep_no} (config_no/rep_no) [{self.config_to_string(config)}] ({round(config_no / len(configs) * 100, 2)}% done)")
                 data = self.generate_data(config)
-                # try:
                 self.run_forward_passes(config, module, data, rep_no)
-                # except:
-                #    warn(f"An error occurred while processing this config [{config}]\n")
             config_no += 1
 
     def run_data_collection_single_config(self, config, module, data) -> None:
@@ -168,10 +166,7 @@ class DataCollector(abc.ABC):
         """
         module.eval()
         for rep_no in range(1, self.num_repeat_config + 1):
-            # try:
             self.run_forward_passes(config, module, data, rep_no)
-            # except:
-            #    warn(f"An error occurred while processing this config [{config}]\n")
 
     def run_forward_passes(self, config, module, data, rep_no) -> None:
         """
