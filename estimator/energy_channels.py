@@ -12,7 +12,6 @@ from dataclasses import dataclass
 
 
 class EnergyChannel(abc.ABC):
-    # TODO: only load model once per session
     @classmethod
     def get_path(cls, version, base_dir, path_type):
         """
@@ -45,14 +44,15 @@ class EnergyChannel(abc.ABC):
         :param model_version: the version of the model to load
         :return: the model
         """
-        print(f"Loading model for {cls.__name__}...")
-        models_dir = os.path.join(os.path.dirname(__file__), "serialized_models/energy_models/")
-        model_path = cls.get_path(model_version, models_dir, 'model')
-        if model_path == '':
-            model = None
-        else:
-            model = load(model_path)
-        return model
+        if not hasattr(cls, "_model_singleton"):
+            print(f"Loading model for {cls.__name__}...")
+            models_dir = os.path.join(os.path.dirname(__file__), "serialized_models/energy_models/")
+            model_path = cls.get_path(model_version, models_dir, 'model')
+            if model_path == '':
+                model = None
+            else:
+                cls._model_singleton = load(model_path)
+        return cls._model_singleton
 
     @classmethod
     def load_feature_preprocessors(cls, model_version):
@@ -61,14 +61,16 @@ class EnergyChannel(abc.ABC):
         :param model_version: the version of the preprocessor
         :return: the preprocessor
         """
-        print(f"Loading preprocessors for {cls.__name__}...")
-        preprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/preprocessors/")
-        preprocessor_path = cls.get_path(model_version, preprocessors_dir, 'preprocessor')
-        if preprocessor_path == '':
-            preprocessor = FunctionTransformer(lambda x: x)
-        else:
-            preprocessor = load(preprocessor_path)
-        return preprocessor
+        if not hasattr(cls, "_postprocessor_singleton"):
+            print(f"Loading preprocessors for {cls.__name__}...")
+            preprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/preprocessors/")
+            preprocessor_path = cls.get_path(model_version, preprocessors_dir, 'preprocessor')
+            if preprocessor_path == '':
+                preprocessor = FunctionTransformer(lambda x: x)
+            else:
+                preprocessor = load(preprocessor_path)
+            cls._preprocessor_singleton = preprocessor
+        return cls._preprocessor_singleton
 
     @classmethod
     def load_target_variable_postprocessor(cls, model_version):
@@ -77,14 +79,16 @@ class EnergyChannel(abc.ABC):
         :param model_version:  the version of the postprocessor
         :return: the postprocessor
         """
-        print(f"Loading postprocessor for {cls.__name__}...")
-        postprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/postprocessors/")
-        postprocessor_path = cls.get_path(model_version, postprocessors_dir, 'postprocessor')
-        if postprocessor_path == '':
-            postprocessor = FunctionTransformer(lambda x: x)
-        else:
-            postprocessor = load(postprocessor_path)
-        return postprocessor
+        if not hasattr(cls, "_postprocessor_singleton"):
+            print(f"Loading postprocessor for {cls.__name__}...")
+            postprocessors_dir = os.path.join(os.path.dirname(__file__), "serialized_models/postprocessors/")
+            postprocessor_path = cls.get_path(model_version, postprocessors_dir, 'postprocessor')
+            if postprocessor_path == '':
+                postprocessor = FunctionTransformer(lambda x: x)
+            else:
+                postprocessor = load(postprocessor_path)
+            cls._postprocessor_singleton = postprocessor
+        return cls._postprocessor_singleton
 
     @abc.abstractmethod
     def compute_energy_estimate(self):
