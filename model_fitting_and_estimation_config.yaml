@@ -28,7 +28,7 @@ model_configurations:
   # ----
   maxpool2d:
     model_version: ''
-    data_file_name: 'maxpooling2d-energies-parsed.csv'
+    data_file_name: 'maxpool2d-energies-parsed.csv'
     base_features: [ 'batch_size','image_size','kernel_size','in_channels','stride','padding' ]
     features_config:
       enable_base_features: True
@@ -62,7 +62,7 @@ model_configurations:
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True
-      enable_log_features: True
+      enable_log_features: False
       enable_macs_feature: False
   softmax:
     model_version: ''
@@ -70,7 +70,7 @@ model_configurations:
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True
-      enable_log_features: True
+      enable_log_features: False
       enable_macs_feature: False
   tanh:
     model_version: ''
@@ -78,6 +78,6 @@ model_configurations:
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True
-      enable_log_features: True
+      enable_log_features: False
       enable_macs_feature: False
 

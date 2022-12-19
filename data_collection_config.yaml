@@ -4,8 +4,8 @@ sampling_timeout: 30
 # specify a seed for reproducible results; leave empty if no seed should be used
 seed: 123456
 # specify for which modules to collect data for, configurations are found below
-# options: "conv2d", "maxpooling2d", "linear", "activations", "architectures"
-to_sample: [ "conv2d","linear","maxpooling2d", "relu", "sigmoid", "tanh", "softmax", "architectures"]
+# options: "conv2d", "maxpool2d", "linear", "activations", "architectures"
+to_sample: [ "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures"]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
@@ -50,13 +50,13 @@ module_configurations:
   # ----
   # MaxPool2d Module
   # ----
-  maxpooling2d:
+  maxpool2d:
     meta:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
       configs_from_architectures: [ ]
-      output_file_name: "maxpooling2d-energies.csv"
+      output_file_name: "maxpool2d-energies.csv"
     module_params:
       batch_size: [ 1,257,1 ]
       image_size: [ 4,225,1 ]

@@ -17,7 +17,7 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     :param y: the ground-truth
     :param y_hat: the estimates
     """
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(8, 4))
     g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=None)
     min_x = min(min(y), min(y_hat))
     max_x = max(max(y), max(y_hat))

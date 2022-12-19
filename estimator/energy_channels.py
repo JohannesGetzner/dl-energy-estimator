@@ -212,9 +212,9 @@ class Conv2dEnergyChannel(EnergyChannel):
 
 
 @dataclass
-class MaxPooling2dEnergyChannel(EnergyChannel):
+class MaxPool2dEnergyChannel(EnergyChannel):
     """
-    the channel implementation of EnergyChannel for the MaxPooling2d module
+    the channel implementation of EnergyChannel for the MaxPool2d module
     """
     config: dict
     batch_size: int

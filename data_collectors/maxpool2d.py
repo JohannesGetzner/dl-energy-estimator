@@ -7,7 +7,7 @@ from data_collectors._data_collector import DataCollector
 from utils.data_utils import parse_codecarbon_output
 
 
-class MaxPooling2dDataCollector(DataCollector):
+class MaxPool2dDataCollector(DataCollector):
 
     def __init__(self,
                  module_param_configs,
@@ -19,7 +19,7 @@ class MaxPooling2dDataCollector(DataCollector):
                  sampling_timeout=30,
                  seed=None
                  ):
-        super(MaxPooling2dDataCollector, self).__init__(
+        super(MaxPool2dDataCollector, self).__init__(
             module_param_configs,
             sampling_timeout,
             sampling_cutoff,
@@ -32,7 +32,7 @@ class MaxPooling2dDataCollector(DataCollector):
             np.random.seed(seed)
         self.configs_from_architectures = configs_from_architectures
 
-    def get_maxpooling2d_configs_from_architectures(self):
+    def get_maxpool2d_configs_from_architectures(self):
         """
         traverses the architectures such as VGG11 specified in the configuration and extracts the configuration of
         all its MaxPool2d modules
@@ -59,9 +59,9 @@ class MaxPooling2dDataCollector(DataCollector):
 
     def validate_config(self, config) -> bool:
         """
-        validates the current configuration. For some modules e.g. MaxPooling2D the kernel-size cannot be larger
+        validates the current configuration. For some modules e.g. MaxPool2D the kernel-size cannot be larger
         than the image-size
-        :param module: the PyTorch MaxPooling2d module
+        :param module: the PyTorch MaxPool2d module
         :param data_dim: the dimensions of the data
         :return: True with configuration is valid, otherwise False
         """
@@ -76,7 +76,7 @@ class MaxPooling2dDataCollector(DataCollector):
 
     def initialize_module(self, config) -> torch.nn.MaxPool2d:
         """
-        initializes the PyTorch MaxPooling module
+        initializes the PyTorch MaxPool2D module
         :param config: a dict that contains the values for the module parameters
         :return: the Conv2D module
         """
@@ -101,7 +101,7 @@ class MaxPooling2dDataCollector(DataCollector):
         random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
         a_configs, a_modules = [], []
         if self.configs_from_architectures:
-            a_configs, a_modules = self.get_maxpooling2d_configs_from_architectures()
+            a_configs, a_modules = self.get_maxpool2d_configs_from_architectures()
         self.print_data_collection_info(random_configs + a_configs)
 
         print("Doing random configs...\n")

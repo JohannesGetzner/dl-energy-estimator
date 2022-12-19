@@ -8,7 +8,7 @@ from .energy_channels import (
     IdentityEnergyChannel,
     LinearEnergyChannel,
     Conv2dEnergyChannel,
-    MaxPooling2dEnergyChannel,
+    MaxPool2dEnergyChannel,
     ReLUEnergyChannel,
     SigmoidEnergyChannel,
     TanhEnergyChannel,
@@ -68,12 +68,12 @@ def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, config: {}, b
 
 @_parse_torch_module.register
 def _(module_to_parse: nn.MaxPool2d, sample_input_dims: torch.Tensor, config: {},
-      batch_size) -> MaxPooling2dEnergyChannel:
+      batch_size) -> MaxPool2dEnergyChannel:
     """
-    hook for the which parses a nn.MaxPool2d to the MaxPooling2dEnergyChannel
+    hook for the which parses a nn.MaxPool2d to the MaxPool2dEnergyChannel
     refer to _parse_torch_module for explanation of parameters
     """
-    return MaxPooling2dEnergyChannel(
+    return MaxPool2dEnergyChannel(
         batch_size=batch_size,
         config=config,
         in_channels=sample_input_dims[1],

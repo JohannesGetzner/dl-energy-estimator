@@ -25,7 +25,7 @@ class SigmoidEnergyModel(EnergyModel):
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
-            "x_preprocessors": StandardScaler(),
+            "x_preprocessors": [StandardScaler()],
             "y_preprocessor": MinMaxScaler()
         }
         dfs, _ = apply_data_transforms(dfs, transformers_dict)

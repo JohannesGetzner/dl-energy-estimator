@@ -17,7 +17,7 @@ def run_estimation():
             batch_size,
             config["model_configurations"]
         )
-        print(f"{a_name} with batch_size {batch_size}: {total_energy}")
+        print(f"Estimated energy-consumption for {a_name.upper()} with batch_size {batch_size}: {total_energy[0]}")
 
 
 def compute_energy_estimate(architecture: nn.Module, batch_size: int, config):
@@ -35,7 +35,7 @@ def compute_energy_estimate(architecture: nn.Module, batch_size: int, config):
         channel_energy = channel.compute_energy_estimate()
         total_energy += channel_energy
         channel_wise_energies.append((channel, total_energy))
-        print("\n")
+    print("\n")
     return total_energy, channel_wise_energies
 
 

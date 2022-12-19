@@ -5,7 +5,7 @@ from utils.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
 
 
-class MaxPooling2dEnergyModel(EnergyModel):
+class MaxPool2dEnergyModel(EnergyModel):
 
     def __init__(self,
                  save_to_path_models,
@@ -13,7 +13,7 @@ class MaxPooling2dEnergyModel(EnergyModel):
                  config,
                  data_path
                  ):
-        super(MaxPooling2dEnergyModel, self).__init__(
+        super(MaxPool2dEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
             config,

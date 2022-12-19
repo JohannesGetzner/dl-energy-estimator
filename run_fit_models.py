@@ -5,11 +5,11 @@ from estimator.models import *
 model_classes = {
     "conv2d": Conv2dEnergyModel,
     "linear": LinearEnergyModel,
-    "maxpool2d": MaxPooling2dEnergyModel,
+    "maxpool2d": MaxPool2dEnergyModel,
     "relu": ReLUEnergyModel,
-    "sigmoid": ReLUEnergyModel,
-    "softmax": ReLUEnergyModel,
-    "tanh": ReLUEnergyModel,
+    "sigmoid": SigmoidEnergyModel,
+    "softmax": SoftMaxEnergyModel,
+    "tanh": TanhEnergyModel,
 }
 
 

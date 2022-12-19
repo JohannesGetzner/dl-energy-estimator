@@ -6,7 +6,7 @@ from data_collectors import *
 data_collectors = {
     "conv2d": Conv2dDataCollector,
     "linear": LinearDataCollector,
-    "maxpooling2d": MaxPooling2dDataCollector,
+    "maxpool2d": MaxPool2dDataCollector,
     "relu": ReLUDataCollector,
     "sigmoid": SigmoidDataCollector,
     "softmax": SoftmaxDataCollector,
