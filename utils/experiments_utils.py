@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
+sns.set(font_scale=1.2)
+
 from typing import Union
 from sklearn.linear_model import LinearRegression, Lasso
 from sklearn.metrics import mean_squared_error
@@ -15,7 +17,7 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     :param y: the ground-truth
     :param y_hat: the estimates
     """
-    plt.figure(figsize=(4, 3))
+    plt.figure(figsize=(8, 6))
     g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=None)
     min_x = min(min(y), min(y_hat))
     max_x = max(max(y), max(y_hat))

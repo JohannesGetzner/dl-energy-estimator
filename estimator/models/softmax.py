@@ -1,8 +1,7 @@
-import os
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from estimator.models._energy_model import EnergyModel
-from experiments.experiments_utils import split_data_set, apply_data_transforms, \
+from utils.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
 
 
