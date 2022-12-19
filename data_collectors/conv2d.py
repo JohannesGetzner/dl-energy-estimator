@@ -102,7 +102,7 @@ class Conv2dDataCollector(DataCollector):
         a_configs, a_modules = [], []
         if self.configs_from_architectures:
             a_configs, a_modules = self.get_conv2d_configs_from_architectures()
-        self.print_data_collection_info(random_configs + a_configs)
+        total_iters, _ = self.get_iterations_and_compute_time(random_configs + a_configs)
 
         print("Doing random configs...\n")
         modules = [self.initialize_module(config) for config in random_configs]

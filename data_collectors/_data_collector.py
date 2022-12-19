@@ -129,16 +129,16 @@ class DataCollector(abc.ABC):
                     configs_list.append(new_config)
         return configs_list
 
-    def print_data_collection_info(self, configs) -> None:
+    def get_iterations_and_compute_time(self, configs) -> (int, float):
         """
         prints the total number of iterations and the approx min. time it will take to collect the data
         :param configs: the configs to be measured
         """
-        print("Total number of iterations: ", len(configs) * self.num_repeat_config)
+        total_iterations = len(configs) * self.num_repeat_config
+        print("Total number of iterations: ", total_iterations)
         compute_time_in_hours = round(len(configs) * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
-        # sleep such that prints don't get messed up with tqdm progress bars
-        time.sleep(0.1)
+        return total_iterations, compute_time_in_hours
 
     def run_data_collection_multiple_configs(self, configs, modules) -> None:
         """
@@ -146,19 +146,23 @@ class DataCollector(abc.ABC):
         :param configs: the configs dictionaries
         :param modules: the PyTorch module instances corresponding to the configs
         """
-        config_no = 0
-        for config, module in zip(configs, modules):
+        iter_no = 0
+        num_iters = len(configs) * self.num_repeat_config
+        for idx, (config, module) in enumerate(zip(configs, modules)):
             module.eval()
             for rep_no in range(1, self.num_repeat_config + 1):
                 print(
-                    f"{config_no}/{rep_no} (config_no/rep_no) [{self.config_to_string(config)}] ({round(config_no / len(configs) * 100, 2)}% done)")
+                    f"{idx}/{rep_no} (config_no/rep_no) [{self.config_to_string(config)}] ({round(iter_no / num_iters * 100, 2)}% done)")
                 data = self.generate_data(config)
                 self.run_forward_passes(config, module, data, rep_no)
-            config_no += 1
+                iter_no += 1
+        print(f"100.0% done")
 
-    def run_data_collection_single_config(self, config, module, data) -> None:
+    def run_data_collection_single_config(self, config, module, data, iter_no, num_iters) -> None:
         """
         runs the data-collection for a single configuration of a PyTorch nn.Module
+        :param num_iters: total number of iterations over all configs and repetitions
+        :param iter_no: idx of the current iteration
         :param config: the config dictionary
         :param module: the PyTorch module instance
         :param data: the data to be used for this single configuration
@@ -166,6 +170,8 @@ class DataCollector(abc.ABC):
         """
         module.eval()
         for rep_no in range(1, self.num_repeat_config + 1):
+            print(
+                f"{iter_no}/{rep_no} (config_no/rep_no) [{self.config_to_string(config)}] ({round(iter_no / num_iters * 100, 2)}% done)")
             self.run_forward_passes(config, module, data, rep_no)
 
     def run_forward_passes(self, config, module, data, rep_no) -> None:

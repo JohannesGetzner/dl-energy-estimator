@@ -47,7 +47,7 @@ class ArchitecturesDataCollector(DataCollector):
             out_features=config["output_size"]
         )
 
-    def print_data_collection_info(self, **kwargs) -> None:
+    def get_iterations_and_compute_time(self, **kwargs) -> (int, float):
         total_iters = len(self.architectures) * self.sampling_cutoff * self.num_repeat_config
         if self.include_module_wise_measurements:
             for a in self.architectures:
@@ -57,6 +57,7 @@ class ArchitecturesDataCollector(DataCollector):
         print("Total number of iterations: ", total_iters * self.num_repeat_config)
         compute_time_in_hours = round(total_iters * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
+        return total_iters, compute_time_in_hours
 
     def generate_data(self, config) -> torch.Tensor:
         """
@@ -70,27 +71,32 @@ class ArchitecturesDataCollector(DataCollector):
         """
         starts the data collection
         """
-        self.print_data_collection_info()
+        total_iters, _ = self.get_iterations_and_compute_time()
+        iter_no = 0
         for a_name in self.architectures:
             print(f"Doing {a_name}...")
             a_module = getattr(models, a_name)(weights=None)
             a_modules = traverse_architecture_and_return_module_configs(a_module)
             configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
-            pbar = tqdm(configs)
-            for config in pbar:
-                pbar.set_description(f"current config:[{self.config_to_string(config)}]")
+            for idx, config in enumerate(configs):
+                # print(f"current config:[{self.config_to_string(config)}]")
                 data = self.generate_data(config)
                 config["freeText"] = f"architecture={a_name};layer_idx={0}"
-                self.run_data_collection_single_config(config, a_module, data)
+                self.run_data_collection_single_config(config, a_module, data, iter_no=iter_no,
+                                                       num_iters=total_iters)
+                iter_no += 1
                 if self.include_module_wise_measurements:
                     # run module wise measurements
                     for module, input_shape, module_idx in a_modules:
-                        pbar.set_description(f"current config:[{self.config_to_string(config)}]")
+                        # print(f"current config:[{self.config_to_string(config)}]")
                         config["freeText"] = f"architecture={a_name};layer_idx={module_idx + 1}"
                         if len(input_shape) == 1:
                             input_shape = config["batch_size"], input_shape[0]
                         else:
                             input_shape = config["batch_size"], input_shape[1], input_shape[2], input_shape[3]
                         data_m = torch.rand(input_shape)
-                        self.run_data_collection_single_config(config, module, data_m)
+                        self.run_data_collection_single_config(config, module, data_m, iter_no=iter_no,
+                                                               num_iters=total_iters)
+                        iter_no += 1
+        print(f"100.0% done")
         parse_codecarbon_output(self.output_path)

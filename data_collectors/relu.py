@@ -53,7 +53,7 @@ class ReLUDataCollector(DataCollector):
 
         print("Doing random configs...\n")
         random_configs = self.generate_module_configurations(self.random_sampling, self.sampling_cutoff)
-        self.print_data_collection_info(random_configs)
+        self.get_iterations_and_compute_time(random_configs)
         modules = [self.initialize_module(config) for config in random_configs]
         self.run_data_collection_multiple_configs(random_configs, modules)
         parse_codecarbon_output(self.output_path)
