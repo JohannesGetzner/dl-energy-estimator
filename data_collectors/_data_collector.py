@@ -11,7 +11,6 @@ from operator import mul
 from warnings import warn
 from codecarbon import EmissionsTracker
 from ptflops import get_model_complexity_info
-from tqdm import tqdm
 from datetime import date
 
 
@@ -42,8 +41,7 @@ class DataCollector(abc.ABC):
         self.num_repeat_config = num_repeat_config
         self.random_sampling = random_sampling
         today = date.today()
-        self.output_path = f"[{today.strftime('%d/%m/%Y')}]-" + re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2',
-                                                                       output_path)
+        self.output_path = re.sub(r'(.+)(.csv)', r'\1' + '-raw' + r'\2',output_path)
         if seed:
             np.random.seed(seed)
 
@@ -148,16 +146,17 @@ class DataCollector(abc.ABC):
         :param configs: the configs dictionaries
         :param modules: the PyTorch module instances corresponding to the configs
         """
-        pb = tqdm(list(zip(configs, modules)))
-        for config, module in pb:
-            pb.set_description(f"current config:[{self.config_to_string(config)}]")
+        config_no = 0
+        for config, module in zip(configs, modules):
             module.eval()
             for rep_no in range(1, self.num_repeat_config + 1):
+                print(f"(config_no={config_no}) [{self.config_to_string(config)}] (rep_no={rep_no})")
                 data = self.generate_data(config)
                 # try:
                 self.run_forward_passes(config, module, data, rep_no)
                 # except:
                 #    warn(f"An error occurred while processing this config [{config}]\n")
+            config_no += 1
 
     def run_data_collection_single_config(self, config, module, data) -> None:
         """
