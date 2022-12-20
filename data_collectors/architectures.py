@@ -48,14 +48,15 @@ class ArchitecturesDataCollector(DataCollector):
         )
 
     def get_iterations_and_compute_time(self, **kwargs) -> (int, float):
-        total_iters = len(self.architectures) * self.sampling_cutoff * self.num_repeat_config
+        total_iters = len(self.architectures)
         if self.include_module_wise_measurements:
             for a in self.architectures:
                 a_module = getattr(models, a)(weights=None)
                 a_modules = traverse_architecture_and_return_module_configs(a_module)
-                total_iters += len(a_modules) * self.sampling_cutoff * self.num_repeat_config
-        print("Total number of iterations: ", total_iters * self.num_repeat_config)
-        compute_time_in_hours = round(total_iters * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
+                total_iters += len(a_modules)
+        total_iters = total_iters * self.num_repeat_config * self.sampling_cutoff
+        print("Total number of iterations: ", total_iters)
+        compute_time_in_hours = round(total_iters * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
         return total_iters, compute_time_in_hours
 
