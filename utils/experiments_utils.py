@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
-sns.set(font_scale=1.2)
+sns.set(font_scale=1)
 
 from typing import Union
 from sklearn.linear_model import LinearRegression, Lasso
@@ -17,8 +17,8 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     :param y: the ground-truth
     :param y_hat: the estimates
     """
-    plt.figure(figsize=(8, 4))
-    g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=None)
+    plt.figure(figsize=(9, 5))
+    g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=95)
     min_x = min(min(y), min(y_hat))
     max_x = max(max(y), max(y_hat))
     if isinstance(min_x, np.ndarray): min_x = min_x[0]
@@ -28,7 +28,7 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     g.set_ylabel("Prediction")
     custom_lines = [
         plt.Line2D([], [], color="#EAEAF2", marker='o', markersize=8, markerfacecolor="#4C72B0"),
-        plt.Line2D([0], [0], color="#4C72B0", lw=2, linestyle="--"),
+        plt.Line2D([0], [0], color="#4C72B0", lw=2, linestyle="-"),
         plt.Line2D([0], [0], color="#f032e6", lw=2, linestyle="--"),
     ]
     plt.legend(custom_lines, ["predictions", "regressor", "ideal"], loc="upper left")
@@ -83,10 +83,10 @@ def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_trai
     :return: the fitted model, the validation R²-Score and MSE
     """
     r2_scores = cross_val_score(
-        model, x_train, y_train.ravel(), cv=10, n_jobs=-1, scoring="r2"
+        model, x_train, y_train.ravel(), cv=5, n_jobs=-1, scoring="r2"
     )
     mses = cross_val_score(
-        model, x_train, y_train.ravel(), cv=10, n_jobs=-1, scoring="neg_mean_squared_error"
+        model, x_train, y_train.ravel(), cv=5, n_jobs=-1, scoring="neg_mean_squared_error"
     )
     model = model.fit(x_train, y_train.ravel())
     val_score = model.score(x_val, y_val.ravel())
