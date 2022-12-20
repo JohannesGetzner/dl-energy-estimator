@@ -47,7 +47,7 @@ class EnergyModel():
             features += ['macs']
         if len(features) == 0:
             warn("No feature set specified!")
-        print(features)
+        print("Used features: ", features)
         return features, data
 
     def load_data(self, param_cols, path):

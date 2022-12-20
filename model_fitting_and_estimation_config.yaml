@@ -20,8 +20,8 @@ model_configurations:
     data_file_name: 'conv2d-energies-parsed.csv'
     base_features: [ 'batch_size', 'image_size', 'kernel_size', 'in_channels', 'out_channels', 'stride', 'padding' ]
     features_config:
-      enable_base_features: True
-      enable_log_features: True
+      enable_base_features: False
+      enable_log_features: False
       enable_macs_feature: True
   # ----
   # MaxPool2d Module

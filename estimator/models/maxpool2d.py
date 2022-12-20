@@ -1,5 +1,5 @@
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, PolynomialFeatures
 from estimator.models._energy_model import EnergyModel
 from utils.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
@@ -25,7 +25,7 @@ class MaxPool2dEnergyModel(EnergyModel):
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
-            "x_preprocessors": [StandardScaler()],
+            "x_preprocessors": [PolynomialFeatures(degree=2, interaction_only=True), StandardScaler()],
             "y_preprocessor": MinMaxScaler()
         }
         dfs, transformers_dict = apply_data_transforms(dfs, transformers_dict)
