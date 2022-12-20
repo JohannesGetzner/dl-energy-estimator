@@ -5,6 +5,7 @@ from warnings import warn
 import pandas as pd
 from datetime import datetime
 from joblib import dump
+from sklearn.pipeline import Pipeline
 
 from utils.experiments_utils import compute_log_transformed_features
 from utils.data_utils import preprocess_and_normalize_energy_data
@@ -68,7 +69,20 @@ class EnergyModel():
         )
 
         if self.transformers_dict["x_preprocessors"]:
-            for idx, transformer in enumerate(self.transformers_dict["x_preprocessors"]):
+            if len(self.transformers_dict["x_preprocessors"]) > 1:
+                pipe = Pipeline([(f"step-{idx}", t) for idx, t in enumerate(self.transformers_dict["x_preprocessors"])])
+                file_name_ext = ""
+                for t in self.transformers_dict["x_preprocessors"]:
+                    file_name_ext += str(t)
+                dump(
+                    pipe,
+                    os.path.join(
+                        self.save_to_path_transforms + "/preprocessors",
+                        f"{str(datetime.now().date())}_{filename}_{file_name_ext}.joblib",
+                    ),
+                )
+            else:
+                transformer = self.transformers_dict["x_preprocessors"][0]
                 dump(
                     transformer,
                     os.path.join(
