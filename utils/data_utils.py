@@ -79,14 +79,16 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose
                 f"Shape before aggregation: {previous_shape}, after aggregation: {df.shape} (non numeric columns removed)")
     if slurm_log_info:
         invalid_configs = parse_slurm_output_for_errors(slurm_log_info[0])
-        df.drop(index=invalid_configs[slurm_log_info[1]])
+        print(f"Dropped observations with the following indices: {invalid_configs[slurm_log_info[1]]}")
+        df = df.drop(index=invalid_configs[slurm_log_info[1]])
+    print(f"Final shape of data set: {df.shape}")
     return df
 
 
 def parse_slurm_output_for_errors(path='') -> []:
     """
     checks the slum cluster log for codecarbon errors and returns configuration indices which caused the errors
-    :param path: the path to the sluarm output file
+    :param path: the path to the slurm output file
     :return:the invalid configurations indices (corresponding to rows in csv)
     """
     file = open(path, 'r')
@@ -102,13 +104,9 @@ def parse_slurm_output_for_errors(path='') -> []:
         elif line.startswith("current config:"):
             curr_config = line
             pattern_match = re.search("([0-9]+)\/[0-9]+", line)
-            curr_config_idx = pattern_match.groups()[0]
+            curr_config_idx = int(pattern_match.groups()[0])
         elif line.startswith("[codecarbon ERROR"):
             if len(invalid_configs[curr_data_collector]) == 0 or invalid_configs[curr_data_collector][
                 -1] != curr_config_idx:
                 invalid_configs[curr_data_collector].append(curr_config_idx)
     return invalid_configs
-
-
-if __name__ == '__main__':
-    parse_slurm_output_for_errors('../test-slurm.out')
