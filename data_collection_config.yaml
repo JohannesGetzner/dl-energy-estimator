@@ -5,7 +5,7 @@ sampling_timeout: 30
 seed: 123456
 # specify for which modules to collect data for, configurations are found below
 # options: "conv2d", "maxpool2d", "linear", "activations", "architectures"
-to_sample: [ "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures" ]
+to_sample: ["architectures",  "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax"]
 module_configurations:
   # ----
   # Architecture Modules (e.g. AlexNet, VGG)
