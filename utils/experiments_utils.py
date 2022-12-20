@@ -110,6 +110,7 @@ def split_data_set(df:pd.DataFrame, feature_names: [], SEED: int) -> {}:
     :return: a dictionary of six datasets corresponding to train,val and test feature/target datasets
     """
     train, val, test = np.split(df.sample(frac=1, random_state=SEED), [int(.7 * len(df)), int(.9 * len(df))])
+    print(f"Number of observations: train/{len(train)}, val/{len(val)} and test-set/{len(test)}")
     dfs = {
         "x_train": train[feature_names],
         "y_train": train['cpu_energy'],
