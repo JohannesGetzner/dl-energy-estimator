@@ -136,7 +136,7 @@ class DataCollector(abc.ABC):
         """
         total_iterations = len(configs) * self.num_repeat_config
         print("Total number of iterations: ", total_iterations)
-        compute_time_in_hours = round(len(configs) * self.num_repeat_config * (self.sampling_timeout + 5) / 60 / 60, 2)
+        compute_time_in_hours = round(total_iterations * (self.sampling_timeout + 5) / 60 / 60, 2)
         print(f"Min. runtime: {compute_time_in_hours}h")
         return total_iterations, compute_time_in_hours
 
