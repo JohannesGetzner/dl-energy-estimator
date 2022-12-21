@@ -34,7 +34,7 @@ def compute_energy_estimate(architecture: nn.Module, batch_size: int, config):
     for channel in channels:
         channel_energy = channel.compute_energy_estimate()
         total_energy += channel_energy
-        channel_wise_energies.append((channel, total_energy))
+        channel_wise_energies.append((channel, channel_energy))
     print("\n")
     return total_energy, channel_wise_energies
 
