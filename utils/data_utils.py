@@ -52,7 +52,7 @@ def parse_codecarbon_output(path, save_to_csv=True) -> pd.DataFrame:
     return df
 
 
-def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose=False,
+def preprocess_and_normalize_energy_data(df, param_cols, num_repeat_config, aggregate=True, verbose=False,
                                          slurm_log_info=None) -> pd.DataFrame:
     """
     this function normalizes the measured energy_values by the number of forward-passes and aggregates repeated configs
@@ -70,6 +70,10 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose
     energy_cols = [col_name for col_name in df.columns if 'energy' in col_name]
     for col in energy_cols:
         df[col] = df[col].div(df['forward_passes'])
+    if slurm_log_info:
+        invalid_configs = parse_slurm_output_for_errors(slurm_log_info[0], num_repeat_config=num_repeat_config)
+        print(f"Dropped observations with the following indices: {invalid_configs[slurm_log_info[1]]}")
+        df = df.drop(index=invalid_configs[slurm_log_info[1]])
     if aggregate:
         previous_shape = df.shape
         df = df.groupby(param_cols, sort=False).mean(numeric_only=True)
@@ -77,15 +81,11 @@ def preprocess_and_normalize_energy_data(df, param_cols, aggregate=True, verbose
         if verbose:
             print(
                 f"Shape before aggregation: {previous_shape}, after aggregation: {df.shape} (non numeric columns removed)")
-    if slurm_log_info:
-        invalid_configs = parse_slurm_output_for_errors(slurm_log_info[0])
-        print(f"Dropped observations with the following indices: {invalid_configs[slurm_log_info[1]]}")
-        df = df.drop(index=invalid_configs[slurm_log_info[1]])
     print(f"Final shape of data set: {df.shape}")
     return df
 
 
-def parse_slurm_output_for_errors(path='') -> []:
+def parse_slurm_output_for_errors(path, num_repeat_config) -> []:
     """
     checks the slum cluster log for codecarbon errors and returns configuration indices which caused the errors
     :param path: the path to the slurm output file
@@ -101,8 +101,8 @@ def parse_slurm_output_for_errors(path='') -> []:
             curr_data_collector = line.split(" ")[-1][:-4]
             invalid_configs[curr_data_collector] = []
         elif line.startswith("current config:") or line.endswith("% done)\n"):
-            pattern_match = re.search("([0-9]+)\/[0-9]+", line)
-            curr_config_idx = int(pattern_match.groups()[0])
+            pattern_match = re.search("([0-9]+)\/([0-9])+", line)
+            curr_config_idx = int(pattern_match.groups()[0]) * num_repeat_config + int(pattern_match.groups()[1]) - 1
         elif line.startswith("[codecarbon ERROR"):
             if len(invalid_configs[curr_data_collector]) == 0 or invalid_configs[curr_data_collector][
                 -1] != curr_config_idx:
