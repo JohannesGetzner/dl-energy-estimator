@@ -94,15 +94,13 @@ def parse_slurm_output_for_errors(path='') -> []:
     file = open(path, 'r')
     lines = file.readlines()
     curr_config_idx = 0
-    curr_config = ""
     invalid_configs = {}
     curr_data_collector = ""
     for line in lines:
         if line.startswith("Starting data-collection for"):
             curr_data_collector = line.split(" ")[-1][:-4]
             invalid_configs[curr_data_collector] = []
-        elif line.startswith("current config:"):
-            curr_config = line
+        elif line.startswith("current config:") or line.endswith("% done)\n"):
             pattern_match = re.search("([0-9]+)\/[0-9]+", line)
             curr_config_idx = int(pattern_match.groups()[0])
         elif line.startswith("[codecarbon ERROR"):
