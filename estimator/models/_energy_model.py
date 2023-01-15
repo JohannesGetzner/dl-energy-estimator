@@ -18,12 +18,12 @@ class EnergyModel():
             save_to_path_models,
             save_to_path_transforms,
             config,
-            data_path
+            data_dir
     ):
         self.save_to_path_models = save_to_path_models
         self.save_to_path_transforms = save_to_path_transforms
         self.config = config
-        self.data_path = data_path
+        self.data_dir = data_dir
         self.SEED = 1234
         self.model = None
         self.transformers_dict = None
@@ -52,8 +52,7 @@ class EnergyModel():
         return features, data
 
     def load_data(self, param_cols, path):
-        data_unnormalized = pd.read_csv(path)
-        data = preprocess_and_normalize_energy_data(data_unnormalized, param_cols, aggregate=True)
+        data = pd.read_csv(path)
         return data
 
     def save_model_and_transformers(self, filename):

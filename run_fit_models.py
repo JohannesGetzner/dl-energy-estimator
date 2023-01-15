@@ -24,7 +24,7 @@ def fit_models():
             save_to_path_models="estimator/serialized_models/energy_models",
             save_to_path_transforms="./estimator/serialized_models/",
             config=model_config,
-            data_path=f"{os.getcwd()}{config['data_directory']}/{model_config['data_file_name']}"
+            data_dir=f"{os.getcwd()}{config['data_directory']}"
         )
         print(f"\n--------------------\nFitting [{model_name}] model")
         model.fit_model()

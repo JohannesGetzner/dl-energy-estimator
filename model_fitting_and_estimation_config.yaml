@@ -1,12 +1,12 @@
 ---
 test_data_path: ''
 estimation_to_compute:
-  #alexnet: 5
-  #vgg11: 16
-  #vgg13: 64
+  alexnet: 5
+  vgg11: 16
+  vgg13: 64
   vgg16: 256
 # from current working directory
-data_directory: '/data'
+data_directory: '/estimator/data/'
 
 
 model_configurations:
@@ -17,7 +17,7 @@ model_configurations:
   conv2d:
     # chooses most recent version if unspecified
     model_version: ''
-    data_file_name: 'conv2d-energies-parsed.csv'
+    data_file: "conv2d.csv"
     base_features: [ 'batch_size', 'image_size', 'kernel_size', 'in_channels', 'out_channels', 'stride', 'padding' ]
     features_config:
       enable_base_features: False
@@ -28,7 +28,7 @@ model_configurations:
   # ----
   maxpool2d:
     model_version: ''
-    data_file_name: 'maxpool2d-energies-parsed.csv'
+    data_file: "maxpool2d.csv"
     base_features: [ 'batch_size','image_size','kernel_size','in_channels','stride','padding' ]
     features_config:
       enable_base_features: True
@@ -39,7 +39,7 @@ model_configurations:
   # ----
   linear:
     model_version: ''
-    data_file_name: 'linear-energies-parsed.csv'
+    data_file: "linear.csv"
     base_features: [ 'batch_size','input_size','output_size' ]
     features_config:
       enable_base_features: False
@@ -50,7 +50,7 @@ model_configurations:
   # ----
   relu:
     model_version: ''
-    data_file_name: 'relu-energies-parsed.csv'
+    data_file: "relu.csv"
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: False
@@ -58,7 +58,7 @@ model_configurations:
       enable_macs_feature: True
   sigmoid:
     model_version: ''
-    data_file_name: 'sigmoid-energies-parsed.csv'
+    data_file: "sigmoid.csv"
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True
@@ -66,7 +66,7 @@ model_configurations:
       enable_macs_feature: False
   softmax:
     model_version: ''
-    data_file_name: 'softmax-energies-parsed.csv'
+    data_file: "softmax.csv"
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True
@@ -74,7 +74,7 @@ model_configurations:
       enable_macs_feature: False
   tanh:
     model_version: ''
-    data_file_name: 'tanh-energies-parsed.csv'
+    data_file: "tanh.csv"
     base_features: [ 'batch_size', 'input_size' ]
     features_config:
       enable_base_features: True

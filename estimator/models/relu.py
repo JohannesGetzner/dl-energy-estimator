@@ -11,17 +11,17 @@ class ReLUEnergyModel(EnergyModel):
                  save_to_path_models,
                  save_to_path_transforms,
                  config,
-                 data_path
+                 data_dir
                  ):
         super(ReLUEnergyModel, self).__init__(
             save_to_path_models,
             save_to_path_transforms,
             config,
-            data_path
+            data_dir
         )
 
     def fit_model(self):
-        data = self.load_data(self.config["base_features"], self.data_path)
+        data = self.load_data(self.config["base_features"], self.data_dir + self.config["data_file"])
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {

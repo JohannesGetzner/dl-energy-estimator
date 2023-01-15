@@ -30,7 +30,7 @@ def _parse_torch_module(module_to_parse: nn.Module, sample_input_dims, config,
     :param batch_size: the batch_size of the forward pass
     :return: the custom channel class or None if the there is no matching channel implementation
     """
-    warn(f"Skipping Layer: No EnergyChannel implemented for {module_to_parse}")
+    print(f"WARN: Skipping Layer: No EnergyChannel implemented for {module_to_parse}")
     return IdentityEnergyChannel()
 
 
@@ -59,7 +59,7 @@ def _(module_to_parse: nn.Conv2d, sample_input_dims: torch.Tensor, config: {}, b
         config=config,
         in_channels=module_to_parse.in_channels,
         out_channels=module_to_parse.out_channels,
-        padding=module_to_parse.padding[0],
+        padding=int(module_to_parse.padding[0]),
         stride=module_to_parse.stride[0],
         kernel_size=module_to_parse.kernel_size[0],
         image_size=sample_input_dims[2]
