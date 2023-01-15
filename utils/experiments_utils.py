@@ -101,16 +101,18 @@ def fit_model(model: Union[LinearRegression, Lasso], x_train: np.ndarray, y_trai
     return model, val_score, val_mse
 
 
-def split_data_set(df:pd.DataFrame, feature_names: [], SEED: int) -> {}:
+def split_data_set(df:pd.DataFrame, feature_names: [], SEED: int, verbose: bool = False) -> {}:
     """
     splits the give dataset into train-, validation- and test-set
+    :param verbose: if True additional information is printed
     :param df: the dataframe to split
     :param feature_names: the names of the training features
     :param SEED: the SEED to specify the random-state
     :return: a dictionary of six datasets corresponding to train,val and test feature/target datasets
     """
     train, val, test = np.split(df.sample(frac=1, random_state=SEED), [int(.7 * len(df)), int(.9 * len(df))])
-    print(f"Number of observations: train/{len(train)}, val/{len(val)} and test-set/{len(test)}")
+    if verbose:
+        print(f"Number of observations: train/{len(train)}, val/{len(val)} and test-set/{len(test)}")
     dfs = {
         "x_train": train[feature_names],
         "y_train": train['cpu_energy'],
