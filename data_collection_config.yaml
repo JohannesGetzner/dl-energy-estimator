@@ -1,45 +1,54 @@
 ---
+# --------------
 # data collection configuration
+# --------------
 sampling_timeout: 30
 # specify a seed for reproducible results; leave empty if no seed should be used
 seed: 777777
-# specify for which modules to collect data for, configurations are found below
-# options: "conv2d", "maxpool2d", "linear", "activations", "architectures"
-to_sample: ["conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures"]
+# specify which data-collectors should be used in the next data-collection run (see run_data_collection.py)
+# for each specified data-collector there must be a corresponding entry in "model_configurations"
+# current options: "conv2d", "maxpool2d", "linear", "activations", "architectures"
+to_sample: [ "conv2d","linear","maxpool2d", "relu", "sigmoid", "tanh", "softmax", "architectures" ]
 module_configurations:
   # ----
-  # Architecture Modules (e.g. AlexNet, VGG)
+  # Architecture Modules (e.g. AlexNet, VGG11/13/16)
   # ----
   architectures:
     meta:
+      # "random_sampling"^* specifies whether the module parameters, should be sampled randomly or via a grid-search
       random_sampling: True
+      # number of unique configurations after which the sampling should stop (defaults to 500)
       sampling_cutoff: 5
+      # number of times each unique configuration should be repeated (defaults to 1)
       num_repeat_config: 3
+      # specifies which architectures should be sampled
       architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-      output_file_name: "architectures-energies.csv"
+      # the name of the codecarbon output filename
+      output_file_name: "architecture-energies.csv"
+      # if True, for each full architecture energy measurement, all layers will be measured individually with the same
+      # batch-size as well
       include_module_wise_measurements: True
+    # specifies the possible value ranges for each module parameter to sample from
     module_params:
+      # syntax -> <parameter_name>: a range <(from,to,by)> or list [.,.,.,.,]
       batch_size: [ 1,257,1 ]
+    # *ATTENTION: if random_sampling=False, the ranges for each entry in 'module_params' below will be interpreted as
+    # lists and thus, if the ranges are too large, a combinatorial explosion will occur. Furthermore, the parameter
+    # "sampling_cutoff" will have no effect and the grid-search will not stop until all combinations have been exhausted
   # ----
   # Conv2d Module
   # ----
   conv2d:
     meta:
-      # ATTENTION: if False a grid-search will be used instead and thus all possible (valid) parameter combinations will be
-      # computed. For this reason if random_sampling=False, the values for 'module-params' below will be interpreted
-      # as a list of values. Additionally, the parameter 'sampling_cutoff' will have no effect.
-      # discrete values to avoid a combinatorial explosion.
       random_sampling: True
-      # number of samples if random_sampling True
       sampling_cutoff: 500
-      # number of times a config should be repeated
       num_repeat_config: 3
-      # PyTorch's architectures to extract specific configurations from
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
-      # the path to the location where the data-file should be saved (a '-raw' suffix will be added automatically)
-      output_file_name: "conv2d-energies-2.csv"
+      # list of PyTorch architectures to take conv2d configurations from; if non-empty all corresponding layers from these
+      # architectures will be measured additionally
+      # current options: 'alexnet','vgg11','vgg13','vgg16'
+      configs_from_architectures: [ ]
+      output_file_name: "conv2d-energies.csv"
     module_params:
-      # syntax -> <parameter_name>: a range <(from,to,by)> or values list [.,.,.,.,]
       batch_size: [ 1,257,1 ]
       image_size: [ 4,225,1 ]
       kernel_size: [ 1,12,1 ]
@@ -55,7 +64,7 @@ module_configurations:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      configs_from_architectures: [ ]
       output_file_name: "maxpool2d-energies.csv"
     module_params:
       batch_size: [ 1,257,1 ]
@@ -72,7 +81,7 @@ module_configurations:
       random_sampling: True
       sampling_cutoff: 500
       num_repeat_config: 3
-      configs_from_architectures: [ 'alexnet','vgg11','vgg13','vgg16' ]
+      configs_from_architectures: [ ]
       output_file_name: "linear-energies.csv"
     module_params:
       batch_size: [ 1,513,1 ]
