@@ -17,7 +17,8 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     :param y: the ground-truth
     :param y_hat: the estimates
     """
-    plt.figure(figsize=(9, 5))
+    plt.figure(figsize=(9, 9))
+    sns.set(font_scale=1.6)
     g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=95)
     min_x = min(min(y), min(y_hat))
     max_x = max(max(y), max(y_hat))
@@ -138,7 +139,7 @@ def test_model(model, x_test: np.ndarray, y_test: np.ndarray, plot_results=True,
     test_score = model.score(x_test, y_test.ravel())
     test_mse = mean_squared_error(y_test.ravel(), y_hat)
     if verbose:
-        print("Test R2 Score: {:.3f}".format(test_score))
+        print("Test R2 Score: {:.4f}".format(test_score))
         print("Test MSE: {:.3e}".format(test_mse))
     if plot_results:
         plot_estimate_vs_ground_truth(y_test, y_hat)
