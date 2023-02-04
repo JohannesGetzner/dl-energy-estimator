@@ -57,7 +57,7 @@ For most of the experiments extensive explanations and interpretation can be fou
 ### Intel RAPL
 
 codecarbon reads the Intel RAPL files for the energy information. Before the data-collection process can run, make sure
-your system allows these files to be read: `sudo chmod 555 -R /sys/class/powercap/intel-rapl/`
+your system allows these files to be read: `sudo chmod 555 -R /sys/class/powercap/intel-rapl/` (also see the './give_RAPL_read_access.sh' script)
 
 ## Running the project
 
