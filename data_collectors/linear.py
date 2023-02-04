@@ -8,7 +8,9 @@ from utils.data_utils import parse_codecarbon_output
 
 
 class LinearDataCollector(DataCollector):
-
+    """
+    Data Collector implementation for the Linear PyTorch module
+    """
     def __init__(self,
                  module_param_configs,
                  output_path,

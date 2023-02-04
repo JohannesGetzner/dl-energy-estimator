@@ -5,7 +5,9 @@ from utils.data_utils import parse_codecarbon_output
 
 
 class SoftmaxDataCollector(DataCollector):
-
+    """
+    Data Collector implementation for the Softmax PyTorch module
+    """
     def __init__(self,
                  module_param_configs,
                  output_path,

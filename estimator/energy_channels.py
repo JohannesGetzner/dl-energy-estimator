@@ -12,6 +12,11 @@ from dataclasses import dataclass
 
 
 class EnergyChannel(abc.ABC):
+    """
+    The base class for all energy channels. A energy channel is our way of representing a PyTorch module, with all its
+    parameters and additionally our methods for estimating and calculating the energy consumption
+    """
+
     @classmethod
     def get_path(cls, version, base_dir, path_type):
         """
@@ -247,6 +252,9 @@ class MaxPool2dEnergyChannel(EnergyChannel):
 
 @dataclass
 class ReLUEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the ReLU module
+    """
     batch_size: int
     input_size: int
     config: dict
@@ -275,6 +283,9 @@ class ReLUEnergyChannel(EnergyChannel):
 
 @dataclass
 class TanhEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Tanh module
+    """
     batch_size: int
     input_size: int
     config: dict
@@ -296,6 +307,9 @@ class TanhEnergyChannel(EnergyChannel):
 
 @dataclass
 class SigmoidEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Sigmoid module
+    """
     batch_size: int
     input_size: int
     config: {}
@@ -317,6 +331,9 @@ class SigmoidEnergyChannel(EnergyChannel):
 
 @dataclass
 class SoftMaxEnergyChannel(EnergyChannel):
+    """
+    the channel implementation of EnergyChannel for the Softmax module
+    """
     batch_size: int
     input_size: int
     config: dict

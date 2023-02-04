@@ -1,12 +1,14 @@
 from sklearn.linear_model import LinearRegression
-from sklearn.preprocessing import MinMaxScaler, StandardScaler, PolynomialFeatures
+from sklearn.preprocessing import MinMaxScaler, PolynomialFeatures
 from estimator.models._energy_model import EnergyModel
 from utils.experiments_utils import split_data_set, apply_data_transforms, \
     fit_model, test_model
 
 
 class TanhEnergyModel(EnergyModel):
-
+    """
+    The class implementing the energy predictor for the Tanh PyTorch module
+    """
     def __init__(self,
                  save_to_path_models,
                  save_to_path_transforms,
@@ -21,7 +23,7 @@ class TanhEnergyModel(EnergyModel):
         )
 
     def fit_model(self):
-        data = self.load_data(self.config["base_features"], self.data_dir + self.config["data_file"])
+        data = self.load_data(self.data_dir + self.config["data_file"])
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {

@@ -8,6 +8,9 @@ from utils.data_utils import parse_codecarbon_output
 
 
 class MaxPool2dDataCollector(DataCollector):
+    """
+        Data Collector implementation for the MaxPool2d PyTorch module
+    """
 
     def __init__(self,
                  module_param_configs,

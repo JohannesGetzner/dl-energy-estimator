@@ -8,10 +8,12 @@ from joblib import dump
 from sklearn.pipeline import Pipeline
 
 from utils.experiments_utils import compute_log_transformed_features
-from utils.data_utils import preprocess_and_normalize_energy_data
 
 
-class EnergyModel():
+class EnergyModel:
+    """
+    Base class for each layer-type energy predictor
+    """
 
     def __init__(
             self,
@@ -29,10 +31,19 @@ class EnergyModel():
         self.transformers_dict = None
 
     @abc.abstractmethod
-    def fit_model(self):
+    def fit_model(self) -> None:
+        """
+        the individual predictor configuration and training process method
+        """
         pass
 
-    def construct_features(self, data):
+    def construct_features(self, data) -> ([], pd.DataFrame):
+        """
+        depending on the configuration in the .yaml file, this method constructs the feature set for each predictor to
+        be trained on
+        :param data: the initial raw data
+        :return: returns a list of all features and a dataset where the new features have been added as columns
+        """
         f_config = self.config["features_config"]
         features = []
         if f_config["enable_base_features"]:
@@ -51,7 +62,12 @@ class EnergyModel():
         print("Used features: ", features)
         return features, data
 
-    def load_data(self, param_cols, path):
+    def load_data(self, path) -> pd.DataFrame:
+        """
+        loads simply loads the data from the raw .csv files
+        :param path: the path to the csv file
+        :return: a pandas DataFrame containing the data
+        """
         data = pd.read_csv(path)
         return data
 
@@ -59,6 +75,7 @@ class EnergyModel():
         """
         This function takes in the respective model and data transformers for an implemented
         class in the analyzer_classes file, and pickles them in the correct folders.
+        :param filename: the name for the corresponding model, which will be added to the file-name
         """
         dump(
             self.model,

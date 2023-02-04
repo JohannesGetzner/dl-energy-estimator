@@ -1,6 +1,5 @@
 import math
 from functools import singledispatch
-from warnings import warn
 import torch
 from torch import nn
 from utils.architecture_utils import traverse_architecture_and_return_module_configs

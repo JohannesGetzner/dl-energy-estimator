@@ -9,7 +9,9 @@ from utils.data_utils import parse_codecarbon_output
 
 
 class ArchitecturesDataCollector(DataCollector):
-
+    """
+    DataCollector implementation for complete architectures such as AlexNet, VGG11/13/16
+    """
     def __init__(self,
                  module_param_configs,
                  output_path,
@@ -48,6 +50,9 @@ class ArchitecturesDataCollector(DataCollector):
         )
 
     def get_iterations_and_compute_time(self, **kwargs) -> (int, float):
+        """
+        see base_class
+        """
         total_iters = len(self.architectures)
         if self.include_module_wise_measurements:
             for a in self.architectures:

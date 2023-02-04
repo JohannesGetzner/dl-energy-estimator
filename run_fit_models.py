@@ -13,7 +13,10 @@ model_classes = {
 }
 
 
-def fit_models():
+def fit_models() -> None:
+    """
+    starts the model training process according to the configuration file for each specified layer-type
+    """
     with open('model_fitting_and_estimation_config.yaml', "r") as stream:
         try:
             config = yaml.safe_load(stream)

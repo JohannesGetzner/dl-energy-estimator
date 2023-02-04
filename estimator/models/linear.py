@@ -6,7 +6,9 @@ from utils.experiments_utils import split_data_set, apply_data_transforms, \
 
 
 class LinearEnergyModel(EnergyModel):
-
+    """
+    The class implementing the energy predictor for the Linear PyTorch module
+    """
     def __init__(self,
                  save_to_path_models,
                  save_to_path_transforms,
@@ -21,7 +23,7 @@ class LinearEnergyModel(EnergyModel):
         )
 
     def fit_model(self):
-        data = self.load_data(self.config["base_features"], self.data_dir + self.config["data_file"])
+        data = self.load_data(self.data_dir + self.config["data_file"])
         features, data = self.construct_features(data)
         dfs = split_data_set(data, features, self.SEED)
         transformers_dict = {
