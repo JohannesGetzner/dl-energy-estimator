@@ -88,4 +88,4 @@ Additionally, I would like to acknowledge the contribution of my former group me
 
 ## Poster
 
-![alt text](./iclr_2023_workshop_poster.jpg)
+![workshop poster](./iclr_2023_workshop_poster.jpg)
