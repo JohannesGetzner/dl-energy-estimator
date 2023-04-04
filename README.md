@@ -85,3 +85,7 @@ First and foremost, I would like to express my deep gratitude to my supervisor [
 His insights and expertise were crucial in shaping the direction of our research and bringing it to success. Without their constant support and encouragement, this work would not have been possible.
 
 Additionally, I would like to acknowledge the contribution of my former group member [Ahmed Darwish](https://github.com/Shiro-Raven), who provided valuable code during the early stages of this project. Thank you for your help.
+
+## Poster
+
+![alt text](./iclr_2023_workshop_poster.jpg)
