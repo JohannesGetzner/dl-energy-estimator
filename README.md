@@ -25,7 +25,8 @@ be more efficient and environmentally friendly, but it would also enable deep le
 facilitate the tradeoff between performance and environmental impact. To achieve this goal, we attempt to compute the
 energy consumption of various deep learning architectures as the sum of layer-wise estimated energies.
 
-See the original [paper]() for more additional information.
+The original paper can be found [here](https://github.com/JohannesGetzner/dl-energy-estimator/blob/main/Accuracy%20is%20not%20the%20only%20Metric%20that%20matters.pdf) or on [arvix](https://arxiv.org/abs/2304.00897). The recording of the presentation and the slides are available on the [Tackling Climate Change with Machine Learning]() website (link will follow soon). 
+For more information visit the project [website](https://www.cs.cit.tum.de/daml/energy-consumption-dl/#c35468) and the website of the [Data Analytics and Machine Learning Group](https://www.cs.cit.tum.de/daml/startseite/) at the Technical University of Munich.
 
 ## About the structure of this repository
 
@@ -43,8 +44,6 @@ See the original [paper]() for more additional information.
 - **./utils** a set of python scripts that contain useful custom functions
 - **./** besides the above, the .yaml files are required for the configuration of the data-collection, training and
   inference process. See the 'run_....py' files for more details
-
-For most of the experiments extensive explanations and interpretation can be found on the wiki.
 
 ## Installation
 
@@ -80,3 +79,9 @@ Given the serialized models, the system is capable of estimating the energy cons
 By running `python run_estimation.py` the system will attempt to predict the energy consumption of the models specified
 in the *model_fitting_and_estimation_config.yaml*.
 
+## Acknowledgments
+
+First and foremost, I would like to express my deep gratitude to my supervisor [Bertrand Charpentier](https://www.cs.cit.tum.de/daml/team/bertrand-charpentier/), from the [DAML Group](https://www.cs.cit.tum.de/daml/startseite/) at the Technical University of Munich, led by [Prof. Dr. Stephan Günnemann](https://www.cs.cit.tum.de/en/daml/team/damlguennemann/), for his unwavering support, guidance, and valuable feedback throughout the entire duration of this project. 
+His insights and expertise were crucial in shaping the direction of our research and bringing it to success. Without their constant support and encouragement, this work would not have been possible.
+
+Additionally, I would like to acknowledge the contribution of my former group member [Ahmed Darwish](https://github.com/Shiro-Raven), who provided valuable code during the early stages of this project. Thank you for your help.
