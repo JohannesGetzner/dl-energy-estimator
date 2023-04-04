@@ -17,20 +17,21 @@ def plot_estimate_vs_ground_truth(y: np.ndarray, y_hat: np.ndarray) -> None:
     :param y: the ground-truth
     :param y_hat: the estimates
     """
-    plt.figure(figsize=(9, 9))
-    sns.set(font_scale=1.6)
-    g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=95)
+    plt.figure(figsize=(10, 10))
+    sns.set(font_scale=1.7, rc={'axes.facecolor': '#F8F8F8', 'figure.facecolor': '#F8F8F8', "grid.linewidth": 0.5,
+                                "grid.color": "#B9B9B9"})
+    g = sns.regplot(x=y, y=y_hat, x_ci=None, ci=95, color="#2F5F98")
     min_x = min(min(y), min(y_hat))
     max_x = max(max(y), max(y_hat))
     if isinstance(min_x, np.ndarray): min_x = min_x[0]
     if isinstance(max_x, np.ndarray): max_x = max_x[0]
-    g.plot([min_x, max_x], [min_x, max_x], transform=g.transData, linestyle="--", color="#f032e6")
+    g.plot([min_x, max_x], [min_x, max_x], transform=g.transData, linestyle="--", color="#e37222")
     g.set_xlabel("Ground Truth")
     g.set_ylabel("Prediction")
     custom_lines = [
-        plt.Line2D([], [], color="#EAEAF2", marker='o', markersize=8, markerfacecolor="#4C72B0"),
-        plt.Line2D([0], [0], color="#4C72B0", lw=2, linestyle="-"),
-        plt.Line2D([0], [0], color="#f032e6", lw=2, linestyle="--"),
+        plt.Line2D([], [], color="white", marker='o', markersize=8, markerfacecolor="#2F5F98"),
+        plt.Line2D([0], [0], color="#2F5F98", lw=2, linestyle="-"),
+        plt.Line2D([0], [0], color="#e37222", lw=2, linestyle="--"),
     ]
     plt.legend(custom_lines, ["predictions", "regressor", "ideal"], loc="upper left")
     plt.show()
