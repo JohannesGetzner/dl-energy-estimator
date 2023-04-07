@@ -92,7 +92,7 @@ project. Thank you for your help.
           year={2023},
           primaryClass={cs.LG},
           howpublished = {\url{https://arxiv.org/abs/2304.00897}},
-          note={ICLR 2023 Workshop: Tackling Climate Change with Machine Learning by Climate Change AI}
+          note={Tackling Climate Change with Machine Learning Workshop by Climate Change AI (ICLR 2023)}
     }
 
 ## Poster
