@@ -90,7 +90,9 @@ project. Thank you for your help.
           title={Accuracy is not the only Metric that matters: Estimating the Energy Consumption of Deep Learning Models}, 
           author={Johannes Getzner and Bertrand Charpentier and Stephan Günnemann},
           year={2023},
-          primaryClass={cs.LG}
+          primaryClass={cs.LG},
+          howpublished = {\url{https://arxiv.org/abs/2304.00897}},
+          note={ICLR 2023 Workshop: Tackling Climate Change with Machine Learning by Climate Change AI}
     }
 
 ## Poster
